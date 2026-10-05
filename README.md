@@ -1,4 +1,16 @@
-# CPS3 Studio · Music
+# CPS3 Studio · Music and Art
+
+Open `Open CPS3 Studio.bat` or `Open CPS3 Studio.html` and choose **Music** or **Art**.
+Import your own `sfiii3nr1.zip` and `sfiii3.zip` once: both modes remember the same ROM
+in this browser, and switching keeps each mode's work on this computer.
+
+**Art** reads sprites, character colours, initial stage layers and small interface tiles
+from that ROM. Browse every sprite by number, draw with 64 pens and layers, import sheets,
+preview animations and prepare supported replacements. Unnamed artwork stays visible.
+Larger sprites and new frames need verified room; an editable preview is not a delivery promise.
+Read [the artist guide](art_editor/docs/ART_GUIDE.md),
+[Art commands](art_editor/docs/AGENT_GUIDE.md) and
+[the generated limits](art_editor/docs/WHAT_ART_CANNOT_DO_YET.md).
 
 A music workstation for **Street Fighter III 3rd Strike** on Capcom's CPS3 arcade board. It runs the
 game's own sound driver (the SH-2 code from your ROM) and an emulation of the board's sample chip in your
@@ -13,8 +25,8 @@ them from your own copy of the game when you open it, and keeps what it derives 
 
 ## Quick start
 
-1. Open `music_editor/index.html` in Edge or Chrome (or `index.html` at the top, which opens it). On
-   Windows, double-click `music_editor/Open the music editor.bat`.
+1. Open `Open CPS3 Studio.html` in Edge or Chrome (or `index.html` at the top). On
+   Windows, double-click `Open CPS3 Studio.bat`, then choose Music or Art.
 2. On the welcome screen choose, or drop, your own **`sfiii3nr1.zip`** (Japan 990512 NO CD rev 1, the
    program) and **`sfiii3.zip`** (the sound samples), the ROM sets FBNeo and Fightcade use. The Studio
    checks them by checksum, decrypts the program in the page and keeps the derived sound data in the
@@ -83,7 +95,8 @@ and both pages' self-tests in a hidden browser. See [docs/TESTING.md](music_edit
 ## Layout
 
 ```
-index.html            opens the Music studio
+index.html            opens the Music and Art landing page
+art_editor/           artwork browsing, editing, imports, palettes, delivery and guides
 music_editor/         the Music studio: index.html (Studio), classic.html, js/ (engine, driver CPU,
                       compiler, formats), studio/ (workspaces), cli/, style/ (arranger), checks/, docs/
 studio_kit/           the shared design system and the ROM loader (zip reader, CPS3 decryption)
