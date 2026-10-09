@@ -2,7 +2,7 @@
 
 A local creative toolkit for **Street Fighter III 3rd Strike on CPS3**. Compose music, edit artwork and colours, inspect and adjust stored move data, then try supported changes in the browser's game preview.
 
-**Music ? Art ? Moves ? Game** share one ROM import and a project workspace. Open the included HTML launcher: there is no account, package installation or frontend build step.
+**Music | Art | Moves | Gameplay** share one ROM import and a project workspace. Open the included HTML launcher: there is no account, package installation or frontend build step.
 
 **Bring your own game files.** The download contains tools, documentation and compatibility metadata. It contains no ROM images, BIOS images, extracted sprites, palette contents, recordings, music sequences from the game or sound samples. The game engine executes the program supplied by you.
 
