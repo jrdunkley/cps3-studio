@@ -1,121 +1,185 @@
-# CPS3 Studio · Music and Art
+# CPS3 Studio
 
-Open `Open CPS3 Studio.bat` or `Open CPS3 Studio.html` and choose **Music** or **Art**.
-Import your own `sfiii3nr1.zip` and `sfiii3.zip` once: both modes remember the same ROM
-in this browser, and switching keeps each mode's work on this computer.
+A local creative toolkit for **Street Fighter III 3rd Strike on CPS3**. Compose music, edit artwork and colours, inspect and adjust stored move data, then try supported changes in the browser's game preview.
 
-**Art** reads sprites, character colours, initial stage layers and small interface tiles
-from that ROM. Browse every sprite by number, draw with 64 pens and layers, import sheets,
-preview animations and prepare supported replacements. Unnamed artwork stays visible.
-Larger sprites and new frames need verified room; an editable preview is not a delivery promise.
-Read [the artist guide](art_editor/docs/ART_GUIDE.md),
-[Art commands](art_editor/docs/AGENT_GUIDE.md) and
-[the generated limits](art_editor/docs/WHAT_ART_CANNOT_DO_YET.md).
+**Music ? Art ? Moves ? Game** share one ROM import and a project workspace. Open the included HTML launcher: there is no account, package installation or frontend build step.
 
-A music workstation for **Street Fighter III 3rd Strike** on Capcom's CPS3 arcade board. It runs the
-game's own sound driver (the SH-2 code from your ROM) and an emulation of the board's sample chip in your
-browser. What you hear while you compose is what the arcade board plays, sample for sample.
-
-Write songs on a piano roll, import MIDI, arrange with the game's 59 music programs (12 of them drum kits),
-study and copy Capcom's 49 original pieces, and export WAV, MIDI, editable projects, text scores and song
-files that a ROM build can install. Everything runs locally: no server, no account, no install, no build step.
-
-**Bring your own ROM.** This repository contains no Capcom code, music, samples or data. The Studio reads
-them from your own copy of the game when you open it, and keeps what it derives on your computer.
+**Bring your own game files.** The download contains tools, documentation and compatibility metadata. It contains no ROM images, BIOS images, extracted sprites, palette contents, recordings, music sequences from the game or sound samples. The game engine executes the program supplied by you.
 
 ## Quick start
 
-1. Open `Open CPS3 Studio.html` in Edge or Chrome (or `index.html` at the top). On
-   Windows, double-click `Open CPS3 Studio.bat`, then choose Music or Art.
-2. On the welcome screen choose, or drop, your own **`sfiii3nr1.zip`** (Japan 990512 NO CD rev 1, the
-   program) and **`sfiii3.zip`** (the sound samples), the ROM sets FBNeo and Fightcade use. The Studio
-   checks them by checksum, decrypts the program in the page and keeps the derived sound data in the
-   browser's own storage. Nothing is uploaded.
-3. Start with a template, open a MIDI file, or open one of Capcom's pieces from the Library. Space plays,
-   Ctrl K finds every command and F1 opens short guides.
+1. Extract the entire ZIP to a folder. Keep the folder structure intact.
+2. Open **`Open CPS3 Studio.html`** in a current desktop Chrome or Edge. On Windows you can use **`Open CPS3 Studio.bat`**. The root `index.html` opens the same launcher.
+3. Choose **Music**, **Art**, **Moves** or **Game**.
+4. At the welcome screen, select your own **`sfiii3nr1.zip`** and **`sfiii3.zip`** together. The original target is **Japan 990512 NO CD rev 1**. Supply the complete sets, including the BIOS and graphics members needed by Game and Art. You can also select the folder containing your game.
+5. Let Studio verify and import the files. Switching modules reuses this import in the same browser.
+6. Export your projects regularly. Browser storage is convenient working storage; clearing site data or moving between browsers can remove or separate it.
 
-The page also works from any static web host (GitHub Pages, for example): the ROM is read by the visitor's
-browser and never leaves it.
+The pages can also be served by a local or static web server. Files selected in the welcome screen are read in your browser. The application does not upload them. Browser storage is separate for each origin; a disk launch and an HTTP launch may need separate imports.
 
-## What is in it
+## What each module does
 
-- **Compose**: parts and sections above a piano roll; velocity and automation lanes; loop and
-  "from the chorus" entry for later rounds; devices (echo, double, harmony, duck, gate, glide, auto-pan,
-  swing, humanize) that write real driver commands; whole-project undo.
-- **Mix**: driver-level volume, expression and pan, mute and solo, meters, a spectrum, Game Check (track,
-  pitch, loop and mix problems) and a Fight Simulator that lets hit sounds and voices take voices 13–16 as
-  they do in a match. Mono, as Fightcade plays it, or the board's stereo.
-- **Sounds**: every instrument by musical role, with its playable range and the drum kits' original bars;
-  an optional Instrument Designer that builds new instruments from slices and loops of the existing samples.
-- **Library**: Capcom's originals (read-only, with "make an editable copy"), templates and your projects,
-  with automatic local versions.
-- **Deliver**: WAV and stems, MIDI, project, text score, agent brief and song file. A song file always holds
-  the plain sequence; a smaller loop-compressed sequence is added only after the Studio has proved, in the
-  driver, that it sounds identical. Deliver › ROM patches a program image for a ROM developer.
-- **Classic editor** (`music_editor/classic.html`): the first, simpler editor, kept as it was.
+| Module | Main workflow |
+| --- | --- |
+| **Music** | Compose on a piano roll, import MIDI, arrange parts, mix, inspect instruments, and export songs, audio and editable projects. |
+| **Art** | Browse stored sprites and animations, draw with indexed pens and layers, import images and sheets, explore palettes and scene usage, and deliver supported replacements. |
+| **Moves** | Select a character and stored move, inspect its timeline, edit supported fields, view collision boxes, and test against an opponent. |
+| **Game** | Run the supplied game, pause and step, save moments, compare runs, and inspect the resources contributing to the picture. |
 
-## Command line (for scripts and AI agents)
+### Music
 
-The same compiler, driver and checks run under Node.js (22.4 or newer; no packages to install):
+Music runs the sound driver read from your ROM through Studio's SH-2 interpreter and sample-chip model. Its Library can open the original game's 49 pieces read-only and make editable copies locally. It provides 59 music programs, including 12 drum kits.
+
+- Piano roll, parts, sections, velocities, automation and project undo.
+- Volume, expression, pan, mute and solo, with meters and Game Check.
+- Echo, harmony, swing and other devices compiled into driver commands.
+- Instrument Designer for rearranging slices and loops of existing samples.
+- WAV and stems, MIDI, editable projects, text scores and song-file export.
+- Optional loop compression, checked against plain-sequence playback before use.
+- The earlier [Classic editor](music_editor/classic.html) remains available.
+
+Use the [composing guide](music_editor/docs/COMPOSING.md) for a first song and the [Music guide](music_editor/docs/README.md) for the workspaces.
+
+### Art
+
+Art reads the artwork from your imported ROM. The Library includes character animations and an **Everything** browser that keeps unnamed sprites accessible by their original IDs.
+
+- Indexed drawing, layers, selection, undo/redo, onion skin and animation playback.
+- PNG and sprite-sheet import/export with frame and origin information.
+- Character colours, supported extended colours and stage colour variants.
+- Gill's timed palette phases, with explicit handling of shared colour sources.
+- Discovery links between artwork, palettes, animations and known scene tables.
+- More palette context for title/ending art, the bonus car and Poison.
+- Cut-content annotations with addresses and digest checks; these do not imply that every unreferenced asset is unused.
+- Background and scene inspection, plus supported fixed-size sprite and colour delivery.
+
+Some edits affect shared artwork or palette sources. Read the displayed usage information before building. The [artist guide](art_editor/docs/ART_GUIDE.md) explains the workflow; the [capability list](art_editor/docs/WHAT_ART_CANNOT_DO_YET.md) records the limits.
+
+### Moves
+
+Choose a character and move group, then select a frame or command in the stored timeline. The inspector exposes supported timing, artwork links, attack/collision records, movement fields and rectangles. Unsupported or unsafe fields remain constrained by the model.
+
+Use **Artwork** to inspect animation and boxes. **Hit preview** loads the imported game in a controlled two-character setup; choose the opponent and spacing, then use the input controls or available move recipe. The game itself performs collision, damage and reactions. The stored animation view alone is not a full combat simulation.
+
+Move edits support undo/redo and shared-project saving. **Build ROM** produces a separate output ZIP; **Try in game** sends the edited images to Game. This release edits existing records at their existing sizes. It does not promise arbitrary new moves, new command layouts or extra storage.
+
+### Game
+
+Game includes Studio's CPS3 machine emulator compiled to WebAssembly, with its C source. It needs the program, BIOS, graphics and sound data from your import.
+
+- Play, pause, frame step, rewind and speed controls.
+- Keyboard and gamepad controls, sound settings and local save slots.
+- Original/edited previews through **Try in game**.
+- Scenario recording and comparison tools.
+- Pixel inspection and frame resource information, with navigation into known artwork.
+
+Game preview is a development tool. Its counters describe the emulator, and its results are not a claim that every edit has been tested on a physical arcade board. See [Game and Moves workflows](docs/WORKFLOWS.md).
+
+## One project across the tools
+
+The shared workspace keeps source identity, documents, history, versions and staged build layers together. Work is separated by game source and, where applicable, game mode. Exported shared projects use **`.cps3project`**; existing Music and Art formats remain supported in their own modules.
+
+Stage changes from each editor's delivery/build controls before creating a combined build. The Builder checks the selected source, original-byte preconditions, dependencies, storage claims and overlapping writes. Conflicting writes are refused. Saving a draft does not by itself make every draft operation deliverable.
+
+Use exported project files for backups. Projects, patched images and exports can contain material derived from your game, so keep them out of the public tool repository.
+
+## Supported sources
+
+| Source | Music | Art / Moves / Game |
+| --- | --- | --- |
+| Original Japan 990512 NO CD rev 1 (`sfiii3nr1`) | Available | Available, within each operation's stated limits |
+| Recognised Infinite 1.033 | Not enabled by the Music module | Available; operation-specific checks still apply |
+| Recognised Infinite 1.04 | Not enabled by the Music module | Available; operation-specific checks still apply |
+
+Recognition uses image hashes, not archive names alone. Infinite modes include Super SF3, 3rd Strike and 3v3. Other builds, including later updates, are not automatically compatible. Importing a recognised source does not grant permission for every possible edit on that source.
+
+## Command line
+
+Node.js **22.4 or newer** runs the JavaScript tools without npm packages. Python is used by the optional sequence checks and engine build tools.
 
 ```sh
+# Music: import your local ROMs, list pieces, compile and render
 cd music_editor
-node cli/studio.js rom import path/to/sfiii3nr1.zip path/to/sfiii3.zip    # writes data/pack.js (private)
+node cli/studio.js rom import /path/to/sfiii3nr1.zip /path/to/sfiii3.zip
 node cli/studio.js pieces --json
 node cli/studio.js build song.sf3score --out song.sf3song.json --json
 node cli/studio.js render song.sf3score --wav song.wav --json
 ```
 
-[`music_editor/docs/AGENT_GUIDE.md`](music_editor/docs/AGENT_GUIDE.md) lists every command and its JSON.
+From the repository root:
 
-## Documentation
+```sh
+# Inspect a shared project without loading a ROM
+node cps3_studio/cli.js inspect --project my-project.cps3project
 
-| Page | For |
-|---|---|
-| [docs/README.md](music_editor/docs/README.md) | the workspaces, privacy, limits |
-| [docs/COMPOSING.md](music_editor/docs/COMPOSING.md) | writing for the game's driver: voices, drums, levels, a first song |
-| [docs/AGENT_GUIDE.md](music_editor/docs/AGENT_GUIDE.md) | the command line and the text score, with complete examples |
-| [docs/FORMATS.md](music_editor/docs/FORMATS.md) and [plan/04_FORMATS.md](music_editor/docs/plan/04_FORMATS.md) | project, song file, score and patch formats |
-| [docs/ROM_GUIDE.md](music_editor/docs/ROM_GUIDE.md) | putting songs into a ROM image: what changes and why it is safe |
-| [docs/plan/02_DRIVER.md](music_editor/docs/plan/02_DRIVER.md) | the CPS3 sound driver and chip, command by command |
-| [docs/TESTING.md](music_editor/docs/TESTING.md) | the test suite and what each test proves |
+# Validate and build against your own source files
+node cps3_studio/cli.js validate --project my-project.cps3project --roms /path/to/roms
+node cps3_studio/cli.js build --project my-project.cps3project --roms /path/to/roms --out out/my-build
 
-## Tests
+# Run or compare scenarios saved in the project
+node cps3_studio/cli.js scenarios --project my-project.cps3project --roms /path/to/roms
+node cps3_studio/cli.js compare --project my-project.cps3project --roms /path/to/roms
+node cps3_studio/cli.js sources
+```
+
+The build destination must be new. CLI outputs and browser downloads are local files; they are not automatically installed into Fightcade. See the [Music command reference](music_editor/docs/AGENT_GUIDE.md), [Art command reference](art_editor/docs/AGENT_GUIDE.md) and [Art delivery API](art_editor/docs/DELIVER_API.md).
+
+## Tests and engine source
 
 ```sh
 cd music_editor
-node checks/run_tests.js --roms path/to/the/folder/with/your/zips
+node checks/run_tests.js --roms /path/to/roms
 ```
 
-The runner makes the private `data/pack.js` from your zips if it is not there yet, then runs every test:
-among them, all 49 of Capcom's pieces opened as projects and rebuilt **sound-identical** (the same stereo
-audio from the driver, sample for sample), loop compression, devices, text scores, MIDI, the command line
-and both pages' self-tests in a hidden browser. See [docs/TESTING.md](music_editor/docs/TESTING.md).
+The Music runner derives its private pack from your files and exercises the compiler, driver, compression, MIDI and browser self-tests. Read [the test guide](music_editor/docs/TESTING.md) for dependencies and coverage.
+
+The bundled game engine can be rebuilt using the recorded Zig version, **0.16.0**:
+
+```sh
+python studio_kit/game/build_engine.py --zig /path/to/zig --check
+```
+
+This compiles only the emulator and compares its WebAssembly with the bundled payload. It does not need or compile a game ROM. Browser users do not need Zig. See [engine build notes](studio_kit/game/BUILDING.md).
 
 ## Layout
 
+```text
+Open CPS3 Studio.html   browser launcher
+Open CPS3 Studio.bat    Windows launcher
+index.html             alternative entry point
+cps3_studio/           module selector and shared-project CLI
+music_editor/          music engine, workspaces, CLI, guides and tests
+art_editor/            artwork, palettes, discovery and delivery
+move_editor/           move records, timeline and combat preview
+game_editor/           game controls, comparison and inspection
+studio_kit/            shared UI, ROM loader, project and Builder
+studio_kit/game/src/   source of the bundled machine emulator
+docs/                  cross-module workflows
 ```
-index.html            opens the Music and Art landing page
-art_editor/           artwork browsing, editing, imports, palettes, delivery and guides
-music_editor/         the Music studio: index.html (Studio), classic.html, js/ (engine, driver CPU,
-                      compiler, formats), studio/ (workspaces), cli/, style/ (arranger), checks/, docs/
-studio_kit/           the shared design system and the ROM loader (zip reader, CPS3 decryption)
-cps3_studio/          a launcher page for the suite
-```
 
-## Limits
+## Limits and troubleshooting
 
-- One game and release: Street Fighter III 3rd Strike, Japan 990512 NO CD rev 1 (`sfiii3nr1`).
-- Sixteen monophonic voices; a chord takes a voice per note. In a match the game's effects borrow voices 13–16.
-- No new samples: the ROM's sample space is full. Custom instruments rearrange the existing samples.
-- No filters or reverb: the chip has none.
+- This is an evolving toolkit, not a finished character or stage construction suite. General assist authoring, character assembly, arbitrary sprite growth and unrestricted stage/screen editing are not completed features of this release.
+- Art writes remain limited by ownership, layout, source and capacity checks. A browsable or drawable asset is not necessarily installable.
+- Music uses 16 monophonic voices; chords consume several voices, and game effects share voices 13?16. New sample storage, chip filters and chip reverb are not supplied.
+- If import fails, check the exact revision and supply both complete archives. Renaming a different ROM set does not make it compatible.
+- If a mode asks for ROMs again, check the selected source and browser origin. Keep all extracted files together and use the same browser for continued work.
+- If an export is refused, read the source, conflict or capacity message. Export the editable project while resolving it.
+- If audio is silent, interact with the page, check the module's sound control and browser permissions. Automated checks intentionally mute browser output.
 
-## Privacy and legal
+## Documentation
 
-Street Fighter III, its music, sounds and program are Capcom's. This project includes none of them and is
-not affiliated with or endorsed by Capcom. Use your own ROM files. Packs, renders, decompiled pieces and
-patched images made from a ROM are derived from Capcom's work: keep them private. The `.gitignore` keeps
-`music_editor/data/`, `music_editor/out/`, `music_editor/songs/` and ROM files out of the repository.
+- [Cross-module workflows](docs/WORKFLOWS.md)
+- [Release notes](CHANGELOG.md)
+- [Art guide](art_editor/docs/ART_GUIDE.md) and [capabilities](art_editor/docs/WHAT_ART_CANNOT_DO_YET.md)
+- [Music guide](music_editor/docs/README.md), [composing](music_editor/docs/COMPOSING.md) and [formats](music_editor/docs/FORMATS.md)
+- [Music ROM guide](music_editor/docs/ROM_GUIDE.md) and [Art ROM guide](art_editor/docs/ROM_GUIDE.md)
+- [Contributing](CONTRIBUTING.md), [third-party notes](THIRD_PARTY.md) and [licence](LICENSE)
 
-The source code is released under the [MIT licence](LICENSE). [THIRD_PARTY.md](THIRD_PARTY.md) records
-where outside knowledge was used.
+## Privacy and ownership
+
+Street Fighter III and its game content belong to Capcom. CPS3 Studio is not affiliated with or endorsed by Capcom. Supply your own game files. Names, addresses, hashes and format descriptions in the tools identify compatible data; the underlying game content is loaded locally.
+
+The public package excludes ROMs, extracted artwork/audio, private songs, captures and saved games. Its embedded WebAssembly is the tool's emulator, not a bundled game program. The source is provided under the [MIT licence](LICENSE); this licence does not cover game content imported or exported by a user. The [third-party notes](THIRD_PARTY.md) describe the emulator references.
+
+The included `.gitignore` excludes common generated and ROM-derived files. Review files before committing: ignore rules cannot undo files already tracked by Git.
