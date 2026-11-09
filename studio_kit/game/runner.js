@@ -1,0 +1,32 @@
+/* Deterministic bounded scenario batches. Callers provide machines and keep all I/O explicit. */
+(function(g){
+  'use strict';
+  function factory(Scenarios,Start){
+    const now=()=>typeof performance!=='undefined'?performance.now():Date.now();
+    function start(core,scenario,eeprom){core.coldBoot(eeprom);if(scenario.start==='ready-select'){for(const [a,b]of Start.inputs(Start.RECIPES['ready-select'])){const fault=core.frame(a,b,0);if(fault)throw new Error('CPU fault '+fault+' while reaching character select');}core.render();const facts=Start.facts(core);if(!facts.ok)throw new Error('Ready start facts failed: '+facts.why.join('; '));}else core.render();return {frame:core.frameNumber(),state:core.hashState()};}
+    function validateWatch(w,frames){if(!w||!Array.isArray(w.peek)||w.peek.length!==2||!Number.isSafeInteger(w.peek[0])||!Number.isSafeInteger(w.peek[1])||w.peek[0]<0x02000000||w.peek[1]<1||w.peek[0]+w.peek[1]>0x02080000||!Number.isSafeInteger(w.maxStillFrames)||w.maxStillFrames<1||!Number.isSafeInteger(w.after??0)||(w.after??0)<0||(w.after??0)>frames)throw new Error('A progress watch needs a RAM range, start frame and positive frame limit');return w;}
+    function watch(core,list,frames){const watches=(list||[]).map(w=>({...validateWatch(w,frames),last:null,since:0}));return frame=>{for(const w of watches){if(frame<(w.after||0))continue;const value=Array.from(core.ram().subarray(w.peek[0]-0x02000000,w.peek[0]-0x02000000+w.peek[1])).join(',');if(value!==w.last){w.last=value;w.since=frame;}else if(frame-w.since>=w.maxStillFrames)throw Object.assign(new Error((w.label||'Progress watch')+' did not change for '+w.maxStillFrames+' frames'),{kind:'progress',frame,watch:{peek:w.peek,after:w.after||0,maxStillFrames:w.maxStillFrames}});}};}
+    function run(core,scenario,{timeoutMs=120000,watch:watchList=[],onFrame=null}={}){const s=Scenarios.validate(scenario);if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1||timeoutMs>3600000)throw new Error('Scenario timeout must be 1 to 3600000 ms');const begun=now(),observe=watch(core,watchList,s.frames),peaks={};let at=0;
+      try{observe(0);const result=Scenarios.run(core,s,{onFrame:(machine,frame)=>{at=frame;if(now()-begun>timeoutMs)throw Object.assign(new Error('Scenario exceeded its execution timeout'),{kind:'timeout',frame});observe(frame);if(machine.meters){const meters=machine.meters();for(const [key,value]of Object.entries(meters))if(Number.isFinite(value))peaks[key]=Math.max(peaks[key]||0,value);}onFrame?.(machine,frame);}});return {...result,ms:now()-begun,peaks,watchCount:watchList.length};}
+      catch(error){const progress=error.scenarioProgress;return {passed:false,ok:false,frames:progress?.frames??at,results:progress?.results||[],checksExecuted:progress?.checksExecuted||0,ms:now()-begun,failure:{kind:error.kind||'execution',phase:'run',message:error.message,frame:error.frame??progress?.frames??at,...(error.watch?{watch:error.watch}:{})},peaks};}
+    }
+    async function batch(createMachine,cases,options={}){
+      if(!Array.isArray(cases)||cases.length<1||cases.length>256)throw new Error('A batch needs 1 to 256 named cases');
+      const ids=new Set();for(const c of cases){if(!c||typeof c.id!=='string'||!c.id||ids.has(c.id))throw new Error('Batch case names must be unique');ids.add(c.id);const scenario=Scenarios.validate(c.scenario);for(const w of c.watch||[])validateWatch(w,scenario.frames);}
+      const results=[];for(const c of cases){let machine,beginning,result,phase='create';
+        try{machine=await createMachine(c);if(machine.identity){phase='identity';Scenarios.assertIdentity(c.scenario,machine.identity);}phase='start';beginning=start(machine.core,c.scenario,machine.eeprom);phase='run';result=run(machine.core,c.scenario,{...options,watch:c.watch||[]});}
+        catch(error){result={passed:false,ok:false,frames:0,failure:{kind:error.kind||'execution',phase,message:error.message,...(error.fault?{fault:error.fault}:{})}};}
+        finally{try{await machine?.destroy?.();}catch(error){result={...result,passed:false,ok:false,cleanupFailure:error.message};}}
+        const report={id:c.id,start:beginning||null,images:machine?.images||null,...result};results.push(report);options.onCase?.(report);
+      }
+      return {passed:results.every(r=>r.passed),ok:results.every(r=>r.passed),cases:results.length,frames:results.reduce((n,r)=>n+r.frames,0),results};
+    }
+    function compare(left,right,scenario,{limit=256,timeoutMs=120000}={}){const s=Scenarios.validate(scenario),begun=now();if(!Number.isSafeInteger(limit)||limit<0||limit>10000||!Number.isSafeInteger(timeoutMs)||timeoutMs<1||timeoutMs>3600000)throw new Error('Invalid comparison limits');let frame=0,changedFrames=0,first=null;const differences=[];
+      const hashes=core=>({state:core.hashState(),ram:core.hashRam(),rgb:core.hashRgb()}),initial={left:hashes(left),right:hashes(right)};let final=initial;const initialEqual=initial.left.state===initial.right.state&&initial.left.rgb===initial.right.rgb;
+      if(!initialEqual){first={frame:0,stateEqual:initial.left.state===initial.right.state,pictureEqual:initial.left.rgb===initial.right.rgb,...initial};if(limit)differences.push(first);}
+      for(const [a,b,count]of s.inputs)for(let i=0;i<count;i++){if(now()-begun>timeoutMs)return {passed:false,ok:false,frames:frame,failure:{kind:'timeout',message:'Comparison exceeded its execution timeout'},differences};const faults=[left.frame(a,b,1),right.frame(a,b,1)];if(faults.some(Boolean))return {passed:false,ok:false,frames:frame,faults,differences};frame++;const l=hashes(left),r=hashes(right),stateEqual=l.state===r.state,pictureEqual=l.rgb===r.rgb;final={left:l,right:r};if(!stateEqual||!pictureEqual){changedFrames++;const difference={frame,stateEqual,pictureEqual,left:l,right:r};if(!first)first=difference;if(differences.length<limit)differences.push(difference);}}
+      return {passed:true,ok:true,equal:initialEqual&&changedFrames===0,initialEqual,initial,final,frames:frame,changedFrames,first,differences,truncated:changedFrames+(initialEqual?0:1)>differences.length,ms:now()-begun};}
+    return {start,run,batch,compare,validateWatch};
+  }
+  const api=factory(g.CPS3Scenarios||(typeof require==='function'&&require('./scenarios')),g.Cps3GameStart||(typeof require==='function'&&require('./start')));api.factory=factory;g.CPS3ScenarioRunner=api;if(typeof module!=='undefined')module.exports=api;
+})(typeof window!=='undefined'?window:globalThis);

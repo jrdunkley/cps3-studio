@@ -1,0 +1,19 @@
+# A pad with lanes, a device, vibrato and a json line; chords longer than their bar keep sounding.
+cps3 score 1
+title: Glass Pad
+tempo: 90
+tempo-change 3.1: 95
+bars: 4
+loop: 1-4
+markers: 2
+autotune: off
+json comment: "a pad with lanes"
+
+part Pad program 46 volume 64 expression 64 pan 108 voices 3 role pad
+  device echo delay=36 level=0.4 pan=opposite repeats=2
+  vibrato depth=50 rate=110 sync=1 delay=48 tremolo=0
+  lane expression: 0=40 96=52 192=64 384=30!
+  lane volume: -2=60< 0=64
+  json layer: "intense"
+  json color: "#88aaff"
+  bar 1 | [A3 C4 E4]:=384 | | [F3 A3 C4]:=384 | |

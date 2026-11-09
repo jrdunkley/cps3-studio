@@ -1,0 +1,29 @@
+# A four-part groove written by hand: bass, chords, lead and drums.
+# Sticky lengths and velocities, % repeats, dotted lengths, a bar spread over two lines, slurs and extras.
+cps3 score 1
+title: Night Drive
+author: Test Writer
+tempo: 118
+bars: 8
+loop: 1-8
+markers: 2
+key: A minor
+section 1: Intro
+section 5: Verse
+
+part Bass program 20 volume 75 expression 64 pan 64 role bass
+  bar 1 | E2:8 E2 G2 A2 B2:4 A2:8 G2 | % |
+          E2:8 r E3:16 E3 r:8 D3 B2:4. | % |
+  bar 5 | E2:4 E2 G2 A2 | % | E2:2 G2 | A2:1 |
+
+part Keys program 2 volume 64 expression 70 pan 40 voices 3 role chords
+  bar 1 | [A2 C3 E3]:2 [A2 C3 E3] | [F2 A2 C3]:2 [F2 A2 C3] | [G2 B2 D3]:2 [G2 B2 D3] | [E2 G#2 B2]:1!90 |
+  bar 5 | [A2 C3 E3]:=384 | | [F2 A2 C3]:=384 | |
+
+part Lead program 43 volume 60 expression 58 pan 24 role lead
+  bar 1 | r:1 | r | A4:8 C5 E5 D5 C5 B4 C5 A4 | E5:4. D5:8 C5:4 B4 |
+  bar 5 | A4:2~ C5{cents=-14 pan=20} | E5:4!80 D5!100~ D5 C5{slide=40} | r:2 A4 | B4:1{bend=0:2;24:-3} |
+
+part Drums program 1 volume 90 expression 88 pan 64 role drums
+  bar 1 | #36:8!110 #42!70 #38!100 #42!70 #36!110 #36 #38 #42!70 | % | % | #38:16!100 #38 #38 #38 #45 #45 #47 #47 #48:8 #48 #49:4 |
+  bar 5 | #36:8!110 #42!70 #38!100 #42!70 #36!110 #36 #38 #42!70 | % | % | #49:1!127 |

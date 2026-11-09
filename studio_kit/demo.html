@@ -1,0 +1,1282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CPS3 Studio Kit - every control, live</title>
+<!-- THE KIT'S REFERENCE PAGE. Every control the kit has, working: kit.css is the look, kit.js is the behaviour. Nothing here is specific to a
+     module. Pictures for review: python checks/shot.py ../studio_kit/demo.html [name] [--size 1280x720]; add #tab=layers|canvas|data|tokens and
+     &show=tip|menu|select|dialog|confirm|prompt|palette|keymap|toasts to open a layer. #selftest runs the kit's own browser checks. -->
+<link rel="stylesheet" href="kit.css">
+<style>
+  /* layout for this page only: grids, gaps, sizes. Every colour, size of type and shape is a kit token. */
+  .pages { display: flex; min-width: 0; min-height: 0; background: var(--bg-0); }
+  .page { flex: 1 1 auto; min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+  .page > .cols { display: grid; min-height: 0; min-width: 0; }
+  .cols.c4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .cols.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cols.c2 { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+  .col { min-width: 0; min-height: 0; overflow: auto; background: var(--bg-1); border-right: 1px solid var(--line); }
+  .col:last-child { border-right: 0; }
+  .col > header { display: flex; align-items: center; gap: var(--s2); height: 40px; padding: 0 var(--s3); border-bottom: 1px solid var(--line); }
+  .group > h3 .num { text-transform: none; letter-spacing: 0; font-size: var(--t-sm); color: var(--ink-3); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
+  .between { justify-content: space-between; }
+  .right-end { margin-left: auto; }
+  .val { width: 52px; text-align: right; }
+  .lab .slider { width: 120px; }
+  .lab .field.num { width: 76px; }
+  .knobs { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); }
+  .knobcell { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: var(--s2) 0; }
+  .knobcell .knob { width: 40px; height: 40px; }
+  .knobcell .num { color: var(--ink); }
+  .knobcell small { color: var(--ink-3); font-size: var(--t-xs); text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; }
+  .pairs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s3); }
+  .bars { display: grid; grid-template-columns: auto 1fr; gap: 6px var(--s3); align-items: center; }
+  .bars .bar { width: 100%; }
+  .meters { display: flex; gap: var(--s2); height: 36px; align-items: stretch; }
+  .meters .meter { width: 8px; }
+  .list { border: 1px solid var(--line); border-radius: var(--r2); overflow: hidden; background: var(--bg-1); }
+  .list .list-row:last-child { border-bottom: 0; }
+  .list .list-row b { font-weight: 600; }
+  .card { border: 1px dashed var(--line-2); border-radius: var(--r2); }
+  .card.empty { padding: var(--s4); }
+  .val.long { width: 76px; }
+  .panel .group { padding: var(--s2) var(--s3) var(--s3); }
+  .panel > header b { font-weight: 600; }
+  .mini { color: var(--ink-3); }
+  /* the foot of the Controls page: a mixer row built from kit controls only */
+  .band { display: flex; gap: var(--s3); align-items: center; padding: var(--s3); background: var(--bg-1); border-top: 1px solid var(--line); overflow: hidden; }
+  .band.strips { flex-direction: column; align-items: stretch; gap: var(--s2); }
+  .strips .row8 { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+  .mstrip { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 6px 8px; border: 1px solid var(--line); border-top: 3px solid var(--c); border-radius: var(--r2); background: var(--bg-2); }
+  .mstrip.muted .low, .mstrip.muted > .top b { opacity: .45; }
+  .mstrip .top { display: flex; align-items: center; gap: 3px; }
+  .mstrip .top b { flex: 1 1 auto; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mstrip .low { display: flex; align-items: center; gap: var(--s2); }
+  .mstrip .low .slider { flex: 1 1 auto; min-width: 0; width: auto; }
+  .mstrip .low .knob { width: 28px; height: 28px; }
+  .mstrip .low .meter { height: 28px; width: 6px; }
+  /* layers page */
+  .zone { display: flex; align-items: center; justify-content: center; height: 56px; border: 1px dashed var(--line-3); border-radius: var(--r2); color: var(--ink-3); }
+  .zone:hover { color: var(--ink-2); border-color: var(--accent); }
+  .scopes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+  .scope { display: flex; flex-direction: column; gap: 4px; padding: var(--s3); border: 1px solid var(--line-2); border-radius: var(--r2); background: var(--bg-2); min-width: 0; }
+  .scope:hover { border-color: var(--line-3); }
+  .scope[data-scope]:focus { outline: none; border-color: var(--accent); background: var(--bg-3); }
+  .scope b { font-weight: 600; }
+  .scope .dim { font-size: var(--t-sm); }
+  .scope .num { font-size: var(--t-lg); color: var(--accent-2); }
+  .actions .list-row { cursor: pointer; }
+  .actions .list-row[aria-disabled=true] { cursor: default; }
+  .actions .list-row b { font-weight: 600; flex: none; }
+  .actions .list-row small { color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: var(--t-sm); }
+  .actions .list-row .keys { display: flex; gap: var(--s1); flex: none; }
+  .actions .list-row .ic { color: var(--ink-3); }
+  .actions .list-row.fresh { background: var(--accent-soft); }
+  /* canvas and split page */
+  .stage { position: relative; min-height: 0; flex: 1 1 auto; overflow: hidden; background: var(--bg-0); }
+  .stage > canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .col.flexcol { display: flex; flex-direction: column; overflow: hidden; }
+  .splitarea { flex: 1 1 auto; display: flex; min-height: 0; background: var(--bg-0); }
+  .pane { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; min-height: 0; overflow: hidden; color: var(--ink-3); background: var(--bg-1); }
+  .pane b { color: var(--ink-2); font-weight: 600; }
+  .pane.a { width: 38%; }
+  .pane.top { flex: 1 1 auto; }
+  .pane.bottom { height: 36%; }
+  .splitarea .vbox { flex: 1 1 auto; min-width: 0; }
+  .readout.slim { height: 28px; line-height: 28px; }
+  .readout.slim b { font-size: var(--t-md); line-height: 28px; }
+  /* data page */
+  #drop { min-height: 150px; }
+  .out { min-height: 88px; padding: var(--s2); border-radius: var(--r1); background: var(--bg-0); border: 1px solid var(--line); color: var(--ink-2); font-family: var(--mono); font-size: var(--t-sm); user-select: text; white-space: pre-wrap; overflow: auto; }
+  .fmt { display: grid; grid-template-columns: auto 1fr; gap: 6px var(--s3); align-items: center; }
+  .fmt .num { color: var(--ink); }
+  /* tokens page */
+  .tile { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: var(--s2); height: 24px; }
+  .tile .sw { width: 24px; height: 18px; border-radius: var(--r1); background: var(--c); border: 1px solid var(--line-2); }
+  .tile .nm { font-family: var(--mono); font-size: var(--t-sm); color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile .vl { font-family: var(--mono); font-size: var(--t-xs); color: var(--ink-3); white-space: nowrap; }
+  .trow { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: baseline; gap: var(--s2); }
+  .trow .nm { font-family: var(--mono); font-size: var(--t-sm); color: var(--ink-3); }
+  .trow .vl { font-family: var(--mono); font-size: var(--t-xs); color: var(--ink-3); }
+  .space { display: grid; grid-template-columns: 36px 1fr; align-items: center; gap: var(--s2); }
+  .space i { display: block; height: 10px; border-radius: var(--r1); background: var(--accent); opacity: .8; }
+  .shapes { display: flex; gap: var(--s4); align-items: center; padding: var(--s2) 0; }
+  .shape { width: 52px; height: 40px; background: var(--bg-3); border: 1px solid var(--line-3); display: flex; align-items: center; justify-content: center; color: var(--ink-3); font-family: var(--mono); font-size: var(--t-xs); }
+  @media (max-width: 1439px) { .knobcell .knob { width: 36px; height: 36px; } .lab .slider { width: 96px; } .val { width: 46px; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand"><span class="mark"></span><span class="wide-only">CPS3 Studio <small>Kit</small></span></div>
+    <span class="sep"></span>
+    <h2>Every control, live</h2>
+    <span class="dim wide-only">Click, drag, type, press keys. Hover anything for its tip.</span>
+    <span class="grow"></span>
+    <span class="tag good" id="count"></span>
+    <button class="btn ghost" id="b-palette"><kbd class="wide-only">Ctrl K</kbd></button>
+    <button class="btn icon ghost" id="b-more" data-tip="Menu|A menu opened from a button. Press Esc or click away to close it."><svg class="ic"><use href="#i-more"/></svg></button>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button data-tab="controls"><svg class="ic"><use href="#i-mix"/></svg>Controls</button>
+    <button data-tab="layers"><svg class="ic"><use href="#i-copy"/></svg>Layers and keys</button>
+    <button data-tab="canvas"><svg class="ic"><use href="#i-compose"/></svg>Canvas and layout</button>
+    <button data-tab="data"><svg class="ic"><use href="#i-folder"/></svg>Data and files</button>
+    <button data-tab="tokens"><svg class="ic"><use href="#i-spark"/></svg>Tokens</button>
+    <div class="right"><span class="wide-only">Plain script, no dependencies</span><span class="tag accent">kit.css + kit.js</span></div>
+  </div>
+
+  <div class="pages">
+
+    <!-- ============================================================================== controls -->
+    <section class="page" data-page="controls">
+      <div class="cols c4">
+
+        <div class="col">
+          <div class="group">
+            <h3>Buttons</h3>
+            <div class="row">
+              <button class="btn" data-tip="Default|The usual button. Hover, press and focus all have a state.">Default</button>
+              <button class="btn primary" data-tip="Primary|One per screen: the thing you are most likely to do.">Primary</button>
+              <button class="btn ghost" data-tip="Ghost|For a toolbar: no box until you hover.">Ghost</button>
+              <button class="btn on" data-tip="On|A button that is switched on.">On</button>
+              <button class="btn danger" data-tip="Danger|Turns red on hover. Say what it costs.">Danger</button>
+              <button class="btn" disabled>Disabled</button>
+              <button class="btn big primary right-end" data-tip="Play|Starts the song from the cursor." data-keys="Space"><svg class="ic"><use href="#i-play"/></svg>Play</button>
+            </div>
+            <div class="row">
+              <button class="btn icon" data-tip="Undo|Steps back one change." data-keys="Ctrl Z"><svg class="ic"><use href="#i-undo"/></svg></button>
+              <button class="btn icon" data-tip="Redo|Puts the change back." data-keys="Ctrl Shift Z"><svg class="ic"><use href="#i-redo"/></svg></button>
+              <button class="btn icon" data-tip="Copy|Copies the selection."><svg class="ic"><use href="#i-copy"/></svg></button>
+              <button class="btn icon ghost" data-tip="Zoom in|Shows less, bigger."><svg class="ic"><use href="#i-zoomin"/></svg></button>
+              <button class="btn icon ghost" data-tip="Zoom out|Shows more, smaller."><svg class="ic"><use href="#i-zoomout"/></svg></button>
+              <button class="btn icon danger" data-tip="Delete|Removes it for good." data-keys="Delete"><svg class="ic"><use href="#i-trash"/></svg></button>
+            </div>
+          </div>
+          <div class="group">
+            <h3>Segmented <span class="num" id="seg-out"></span></h3>
+            <div class="row">
+              <div id="seg-tools"></div>
+              <div id="seg-side"></div>
+            </div>
+            <div class="row"><div id="seg-mon"></div></div>
+          </div>
+          <div class="group">
+            <h3>Switches and toggles</h3>
+            <label class="lab"><span>Echo</span><span class="switch on" id="sw-echo"></span></label>
+            <label class="lab"><span>Slur touching notes</span><span class="switch" id="sw-slur"></span></label>
+            <div class="row">
+              <span class="dim">Mute and solo</span>
+              <button class="tog mute" id="t-mute" data-tip="Mute|Silences this part.">M</button>
+              <button class="tog solo" id="t-solo" data-tip="Solo|Plays only this part.">S</button>
+              <button class="btn ghost right-end" id="t-ghost" data-tip="Ghost notes|Shows the other parts, faint."><svg class="ic"><use href="#i-piano"/></svg>Ghost notes</button>
+            </div>
+          </div>
+          <div class="group">
+            <h3>Tabs</h3>
+            <div class="tabs" id="mini-tabs">
+              <button data-tab="part">Part</button><button data-tab="note">Note</button><button data-tab="song">Song</button>
+            </div>
+            <p class="hint" id="mt-part">The Part tab: name, instrument and level.</p>
+            <p class="hint" id="mt-note" hidden>The Note tab: pitch, start and length of what is selected.</p>
+            <p class="hint" id="mt-song" hidden>The Song tab: tempo, key, loop and sections.</p>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="group">
+            <h3>Sliders</h3>
+            <label class="lab"><span>Volume</span><span class="hbox"><input type="range" class="slider" id="s-vol"><span class="num dim val" id="s-vol-v"></span></span></label>
+            <label class="lab"><span>Expression</span><span class="hbox"><input type="range" class="slider" id="s-exp"><span class="num dim val" id="s-exp-v"></span></span></label>
+            <label class="lab"><span>Level</span><span class="hbox"><input type="range" class="slider" id="s-mix"><span class="num dim val" id="s-mix-v"></span></span></label>
+            <label class="lab"><span>Delay</span><span class="hbox"><input type="range" class="slider" id="s-time"><span class="num dim val" id="s-time-v"></span></span></label>
+            <p class="hint">Drag, or click the track to jump. <kbd>Shift</kbd> goes slowly. Double-click for the default. Click, then use the wheel or the arrow keys.</p>
+          </div>
+          <div class="group">
+            <h3>Number fields</h3>
+            <label class="lab"><span>Voices</span><input class="field num" id="n-voices" value="1"></label>
+            <label class="lab"><span>Tempo</span><input class="field num" id="n-tempo" value="130.0"></label>
+            <label class="lab"><span>Transpose</span><input class="field num" id="n-trans" value="0"></label>
+            <p class="hint">Type, drag sideways to scrub, or use <kbd>Up</kbd> and <kbd>Down</kbd>. <kbd>Esc</kbd> puts it back.</p>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="group">
+            <h3>Knobs</h3>
+            <div class="knobs">
+              <div class="knobcell"><span class="knob" id="k-level"></span><span class="num" id="k-level-v"></span><small>Level</small></div>
+              <div class="knobcell"><span class="knob bi" id="k-pan"></span><span class="num" id="k-pan-v"></span><small>Pan</small></div>
+              <div class="knobcell"><span class="knob bi" id="k-tune"></span><span class="num" id="k-tune-v"></span><small>Tune</small></div>
+            </div>
+            <p class="hint">Drag up or down. The two on the right grow from the middle.</p>
+          </div>
+          <div class="group">
+            <h3>Fields and drop-downs</h3>
+            <input class="field wide" id="f-name" placeholder="Name your song" value="Night Drive">
+            <div class="pairs">
+              <label class="lab"><span>Snap</span><select class="field" id="sel-snap"><option>1/4</option><option>1/8</option><option selected>1/16</option><option>1/32</option><option>Off</option></select></label>
+              <label class="lab"><span>Scale</span><select class="field" id="sel-scale"><option>Chromatic</option><option selected>A minor</option><option>C major</option><option>D dorian</option></select></label>
+            </div>
+          </div>
+          <div class="group">
+            <h3>A panel</h3>
+            <div class="panel">
+              <header><span class="switch on" id="sw-panel"></span><b>Echo</b><span class="grow"></span><span class="mini">+1 track</span></header>
+              <div class="group">
+                <label class="lab"><span>Delay</span><span class="hbox"><input type="range" class="slider" id="s-pdelay"><span class="num dim val long" id="s-pdelay-v"></span></span></label>
+                <label class="lab"><span>Side</span><div id="seg-pside"></div></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="group">
+            <h3>Tags, keys, bars</h3>
+            <div class="row">
+              <span class="tag">Plain</span><span class="tag good"><svg class="ic" style="width: 12px; height: 12px"><use href="#i-check"/></svg>Saved</span><span class="tag warn">Track 14</span><span class="tag bad">17 tracks</span><span class="tag accent">New</span>
+            </div>
+            <div class="row"><kbd>Ctrl</kbd><kbd>K</kbd><span class="dim">search</span><kbd>Space</kbd><span class="dim">play</span><kbd>?</kbd><span class="dim">all keys</span></div>
+            <div class="bars">
+              <span class="dim">Tracks <b class="num">11</b>/16</span><span class="bar" style="--v: .69"><i></i></span>
+              <span class="dim">Size <b class="num">4.1</b> KB</span><span class="bar" style="--v: .08"><i></i></span>
+              <span class="dim">Room <b class="num">15</b>/16</span><span class="bar warn" style="--v: .94"><i></i></span>
+              <span class="dim">Over by <b class="num">1</b></span><span class="bar bad" style="--v: 1"><i></i></span>
+            </div>
+            <div class="row between">
+              <div class="meters" id="meters"></div>
+              <div class="voices" id="voices"></div>
+            </div>
+          </div>
+          <div class="group">
+            <h3>Lists and empty states</h3>
+            <div class="list" id="list">
+              <div class="list-row on"><span class="dot" style="background: var(--role-lead)"></span><b>Night Drive</b><span class="grow"></span><span class="tag good">Saved</span></div>
+              <div class="list-row"><span class="dot" style="background: var(--role-bass)"></span><span>Harbour Lights</span><span class="grow"></span><span class="faint num">4:12</span></div>
+              <div class="list-row"><span class="dot" style="background: var(--role-pad)"></span><span>Lanterns</span><span class="grow"></span><span class="faint num">3:48</span></div>
+            </div>
+            <div class="card empty"><b>Nothing here yet.</b><span>Press <kbd>B</kbd> and drag to draw notes, or drop a file anywhere.</span></div>
+          </div>
+        </div>
+
+      </div>
+      <div class="band strips">
+        <h3 class="wide-only">Together: a mixer row, built from kit controls only</h3>
+        <div class="row8" id="strips"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================================ layers -->
+    <section class="page" data-page="layers" hidden>
+      <div class="cols c2">
+        <div class="col">
+          <div class="group">
+            <h3>Tooltips</h3>
+            <p class="hint">Rest the pointer on a control for half a second. Moving to the next one is instant. The status line says the same.</p>
+            <div class="row">
+              <button class="btn" data-tip="Name only">Name only</button>
+              <button class="btn" id="b-tip" data-tip="Echo|A quieter, later copy of this part on its own track: how Capcom fakes reverb.|Costs one track per voice." data-keys="E">With everything</button>
+              <button class="btn" data-tip="Quantize|Snaps the notes to the grid." data-keys="Q"><svg class="ic"><use href="#i-quantize"/></svg>Quantize</button>
+              <button class="btn ghost" data-tip="Near an edge|A tip flips and slides so it never runs off the screen or covers the control it is about.">Near an edge</button>
+            </div>
+          </div>
+          <div class="group">
+            <h3>Menus</h3>
+            <div class="row">
+              <button class="btn" id="b-menu"><svg class="ic"><use href="#i-more"/></svg>Open a menu</button>
+              <button class="btn" id="b-select-menu">A menu from the keyboard</button>
+            </div>
+            <div class="zone" id="zone">Right-click here for a menu at the pointer</div>
+          </div>
+          <div class="group">
+            <h3>Dialogs</h3>
+            <div class="row">
+              <button class="btn" id="b-dialog">Dialog</button>
+              <button class="btn" id="b-confirm">Confirm</button>
+              <button class="btn" id="b-danger">Confirm a deletion</button>
+              <button class="btn" id="b-prompt">Prompt</button>
+              <button class="btn" id="b-palette2" data-tip="Command palette|Searches every command, and what the modules add, by any letters of the name." data-keys="Ctrl K"><svg class="ic"><use href="#i-search"/></svg>Palette</button>
+              <button class="btn" id="b-keymap" data-tip="Keyboard shortcuts|Lists every key." data-keys="?">Key map</button>
+            </div>
+          </div>
+          <div class="group">
+            <h3>Toasts</h3>
+            <div class="row">
+              <button class="btn" id="b-t-info">Info</button>
+              <button class="btn" id="b-t-good">Done</button>
+              <button class="btn" id="b-t-warn">Warning</button>
+              <button class="btn" id="b-t-bad">Problem</button>
+              <button class="btn" id="b-t-act">With an action</button>
+            </div>
+          </div>
+          <div class="group">
+            <h3>The same key, depending on where you are</h3>
+            <div class="scopes">
+              <div class="scope" tabindex="0" data-scope="roll" data-status="Piano roll|Click here, then press Up or Down: the note moves."><b>Piano roll</b><span class="dim">Up and Down move the note</span><span class="num" id="sc-roll"></span></div>
+              <div class="scope" tabindex="0" data-scope="mixer" data-status="Mixer|Click here, then press Up or Down: the fader moves."><b>Mixer</b><span class="dim">Up and Down move the fader</span><span class="num" id="sc-mixer"></span></div>
+              <label class="scope"><b>Typing</b><span class="dim">Space, Q and L stay letters in a field</span><input class="field wide" id="sc-text" placeholder="Type here"></label>
+            </div>
+          </div>
+        </div>
+        <div class="col actions">
+          <header><h3 class="grow">Actions</h3><span class="dim" id="last">Press a key, click a row, or press <kbd>Ctrl K</kbd>.</span></header>
+          <div class="group">
+            <h3>Buttons that follow an action</h3>
+            <div class="row" id="bound"></div>
+            <label class="lab"><span>Allow Save</span><span class="switch on" id="sw-save"></span></label>
+            <p class="hint">Switch it off: Save dims and its key stops, but its tip still says what it does.</p>
+          </div>
+          <div class="group" style="padding: 0">
+            <div id="actions"></div>
+          </div>
+        </div>
+      </div>
+      <div class="band"><span class="dim">One registry: a button, a menu row, a shortcut and a palette row are the same action.</span><span class="grow"></span><kbd>Ctrl K</kbd><span class="dim">palette</span><kbd>?</kbd><span class="dim">key map</span><kbd>Esc</kbd><span class="dim">closes the top layer</span></div>
+    </section>
+
+    <!-- ================================================================================ canvas -->
+    <section class="page" data-page="canvas" hidden>
+      <div class="cols c2">
+        <div class="col flexcol">
+          <header><h3 class="grow">Split panes</h3><span class="dim wide-only">Drag a line. Double-click resets. Arrow keys move it. The size is remembered.</span></header>
+          <div class="splitarea" id="splitarea">
+            <div class="pane a" id="paneA"><b>Left pane</b><span class="num" id="sizeA"></span></div>
+            <div class="splitter v" id="sp1"></div>
+            <div class="vbox">
+              <div class="pane top" id="paneTop"><b>Top pane</b><span class="num" id="sizeTop"></span></div>
+              <div class="splitter h" id="sp2"></div>
+              <div class="pane bottom" id="paneBottom"><b>Bottom pane</b><span class="num" id="sizeBottom"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="col flexcol">
+          <header><h3 class="grow">Canvas, drag and wheel</h3><div class="readout slim"><small>Bar</small><b id="c-pos"></b><small>Zoom</small><b id="c-zoom"></b></div></header>
+          <div class="stage" id="stage"><canvas id="cv"></canvas></div>
+          <div class="group" style="border-top: 1px solid var(--line)">
+            <p class="hint">Drawn in device pixels, redrawn when the window changes. Drag on it to move the playhead, which lives on its own layer. Wheel scrolls, <kbd>Shift</kbd> and wheel scrolls sideways, <kbd>Ctrl</kbd> and wheel (or a pinch) zooms at the pointer.</p>
+          </div>
+        </div>
+      </div>
+      <div class="band"><span class="dim">Size in CSS pixels</span><b class="num" id="c-size"></b><span class="dim">Device pixels</span><b class="num" id="c-dev"></b><span class="grow"></span><span class="dim">Colours come from the --cv-* tokens, read with Kit.css.</span></div>
+    </section>
+
+    <!-- ================================================================================== data -->
+    <section class="page" data-page="data" hidden>
+      <div class="cols c3">
+        <div class="col">
+          <div class="group">
+            <h3>Storage <span class="tag" id="store-mode"></span></h3>
+            <p class="hint">Kit.store is IndexedDB (database cps3studio); the same calls work in memory where a browser refuses it. Kit.pref keeps small settings.</p>
+            <label class="lab"><span>Key</span><input class="field" id="d-key" value="song"></label>
+            <label class="lab"><span>Value</span><input class="field" id="d-val" value="Night Drive"></label>
+            <div class="row"><button class="btn" id="d-set">Save</button><button class="btn" id="d-get">Load</button><button class="btn" id="d-del">Delete</button></div>
+            <div class="out" id="d-out">Nothing yet.</div>
+          </div>
+          <div class="group">
+            <h3>Stored under this store <span class="num" id="d-count"></span></h3>
+            <div class="list" id="d-list"></div>
+          </div>
+          <div class="group">
+            <h3>Remembered setting</h3>
+            <label class="lab"><span>Keep this switch after a reload</span><span class="switch" id="sw-pref"></span></label>
+          </div>
+        </div>
+        <div class="col">
+          <div class="group">
+            <h3>Files</h3>
+            <div class="dropzone" id="drop"><b>Drop a file here</b><span>Any file; it is read here and goes nowhere.</span></div>
+            <div class="row"><button class="btn" id="f-pick"><svg class="ic"><use href="#i-import"/></svg>Open a file</button><button class="btn" id="f-dl"><svg class="ic"><use href="#i-export"/></svg>Download a file</button><button class="btn" id="f-dir"><svg class="ic"><use href="#i-folder"/></svg>Write into a folder</button></div>
+            <div class="out" id="f-out">No file yet.</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="group">
+            <h3>Formatting</h3>
+            <label class="lab"><span>Ticks</span><input class="field num" id="m-ticks" value="1656"></label>
+            <label class="lab"><span>Note number</span><input class="field num" id="m-note" value="61"></label>
+            <label class="lab"><span>Bytes</span><input class="field num" id="m-bytes" value="192922"></label>
+            <label class="lab"><span>Seconds</span><input class="field num" id="m-secs" value="83.4"></label>
+            <label class="lab"><span>A note by name</span><input class="field num" id="m-byname" value="C#4"></label>
+            <div class="fmt">
+              <span class="dim">Bar.beat.tick</span><b class="num" id="m-pos"></b>
+              <span class="dim">Note name</span><b class="num" id="m-name"></b>
+              <span class="dim">Size</span><b class="num" id="m-size"></b>
+              <span class="dim">Time</span><b class="num" id="m-time"></b>
+              <span class="dim">With commas</span><b class="num" id="m-int"></b>
+              <span class="dim">Name as a number</span><b class="num" id="m-num"></b>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="band"><span class="dim">Everything here stays in this browser. Nothing is uploaded.</span></div>
+    </section>
+
+    <!-- ================================================================================ tokens -->
+    <section class="page" data-page="tokens" hidden>
+      <div class="cols c4">
+        <div class="col">
+          <div class="group"><h3>Surfaces and lines</h3><div id="tk-surf"></div></div>
+          <div class="group"><h3>Text</h3><div id="tk-ink"></div></div>
+          <div class="group"><h3>Shape and shadow</h3><div class="shapes"><span class="shape" style="border-radius: var(--r1)">r1</span><span class="shape" style="border-radius: var(--r2)">r2</span><span class="shape" style="border-radius: var(--r3)">r3</span><span class="shape" style="box-shadow: var(--shadow)">shadow</span></div></div>
+        </div>
+        <div class="col">
+          <div class="group"><h3>Meaning</h3><div id="tk-mean"></div></div>
+          <div class="group"><h3>What a part does</h3><div id="tk-role"></div></div>
+        </div>
+        <div class="col">
+          <div class="group"><h3>For canvas drawing</h3><div id="tk-cv"></div></div>
+        </div>
+        <div class="col">
+          <div class="group"><h3>Type</h3><div class="stack" id="tk-type"></div></div>
+          <div class="group"><h3>Space</h3><div class="stack" id="tk-space"></div></div>
+        </div>
+      </div>
+      <div class="band"><span class="dim">Modules use these names and nothing else: no colour, size of type, radius or shadow of their own. Hover a swatch for its value.</span></div>
+    </section>
+
+  </div>
+
+  <div class="statusbar">
+    <span class="hintline"></span>
+    <span class="grow"></span>
+    <span>One kit for every Studio module</span>
+  </div>
+</div>
+
+<script src="icons.js"></script>
+<script src="kit.js"></script>
+<script>
+/* the demo: wires every control of the page above and shows each layer of the kit */
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const clamp = Kit.clamp;
+  const say = (text) => Kit.toast(text, { ms: 2200 });
+  const frag = new URLSearchParams(location.hash.replace(/^#/, ''));
+  Kit.status('Hover any control: this line says what it does and which key does it.');
+
+  /* ---- actions: one registry for buttons, menus, keys and the palette ------------------------------- */
+  let canSave = true, playing = false, looping = true;
+  const fresh = (id) => { $('last').textContent = 'Last: ' + Kit.action.get(id).title; const row = document.querySelector(`[data-action="${id}"]`); if (row) { row.classList.add('fresh'); setTimeout(() => row.classList.remove('fresh'), 450); } };
+  Kit.action({ id: 'demo.save', title: 'Save', hint: 'Writes the song into this browser.', keys: 'Ctrl S', group: 'File', icon: 'save', enabled: () => canSave, run: () => { fresh('demo.save'); say('Saved.'); } });
+  Kit.action({ id: 'demo.undo', title: 'Undo', hint: 'Steps back one change.', keys: 'Ctrl Z', group: 'Edit', icon: 'undo', run: () => { fresh('demo.undo'); say('Undone.'); } });
+  Kit.action({ id: 'demo.redo', title: 'Redo', hint: 'Puts the change back.', keys: 'Ctrl Shift Z, Ctrl Y', group: 'Edit', icon: 'redo', run: () => { fresh('demo.redo'); say('Redone.'); } });
+  Kit.action({ id: 'demo.play', title: 'Play', hint: 'Starts and stops the song.', keys: 'Space', group: 'Transport', icon: 'play', checked: () => playing, run: () => { playing = !playing; fresh('demo.play'); } });
+  Kit.action({ id: 'demo.loop', title: 'Loop', hint: 'Plays the chosen range again and again.', keys: 'L', group: 'Transport', icon: 'loop', checked: () => looping, run: () => { looping = !looping; fresh('demo.loop'); } });
+  Kit.action({ id: 'demo.quantize', title: 'Quantize', hint: 'Snaps the selected notes to the grid.', note: 'Works on the notes you have selected.', keys: 'Q', group: 'Edit', icon: 'quantize', run: () => { fresh('demo.quantize'); say('Notes snapped.'); } });
+  /* the same keys mean different things in different places: a scope on the action, a data-scope on the region */
+  let pitch = 60, fader = 100;
+  const showScopes = () => { $('sc-roll').textContent = Kit.fmt.note(pitch) + '  ' + pitch; $('sc-mixer').textContent = String(fader); };
+  Kit.action({ id: 'demo.noteup', title: 'Note up', hint: 'Moves the selected note up one semitone.', keys: 'Up', scope: 'roll', repeat: true, group: 'Piano roll', run: () => { pitch = Math.min(127, pitch + 1); showScopes(); fresh('demo.noteup'); } });
+  Kit.action({ id: 'demo.notedown', title: 'Note down', hint: 'Moves the selected note down one semitone.', keys: 'Down', scope: 'roll', repeat: true, group: 'Piano roll', run: () => { pitch = Math.max(0, pitch - 1); showScopes(); fresh('demo.notedown'); } });
+  Kit.action({ id: 'demo.faderup', title: 'Fader up', hint: 'Raises the volume of the selected part.', keys: 'Up', scope: 'mixer', repeat: true, group: 'Mixer', run: () => { fader = Math.min(127, fader + 1); showScopes(); fresh('demo.faderup'); } });
+  Kit.action({ id: 'demo.faderdown', title: 'Fader down', hint: 'Lowers the volume of the selected part.', keys: 'Down', scope: 'mixer', repeat: true, group: 'Mixer', run: () => { fader = Math.max(0, fader - 1); showScopes(); fresh('demo.faderdown'); } });
+  showScopes();
+  const bound = $('bound');
+  for (const [id, cls, label] of [['demo.undo', 'btn icon'], ['demo.redo', 'btn icon'], ['demo.play', 'btn icon'], ['demo.loop', 'btn icon'], ['demo.quantize', 'btn ghost', true], ['demo.save', 'btn primary', true]]) {
+    const b = Kit.el('button', { class: cls }); bound.append(b); Kit.bind(b, id, { chip: !!label, label: !!label });
+  }
+  Kit.bind($('b-palette'), 'palette.open', { fill: false });
+  $('b-palette').prepend(Kit.icon('search'));
+  Kit.toggle($('sw-save'), { value: true, onChange: (on) => { canSave = on; Kit.refresh(true); } });
+  /* the list of every registered action: a click runs it */
+  const list = $('actions');
+  const isFnLike = (f) => typeof f === 'function';
+  const off = (a) => !!(a && isFnLike(a.enabled) && !a.enabled());
+  function drawActions() {
+    list.replaceChildren();
+    for (const a of Kit.actions()) {
+      list.append(Kit.el('div.list-row', { 'data-action': a.id, 'aria-disabled': off(a) ? 'true' : null, onclick: () => Kit.run(a.id) },
+        a.icon ? Kit.icon(a.icon) : null, Kit.el('b', null, a.title), Kit.el('small.grow', null, a.hint), Kit.el('span.tag', null, a.group),
+        Kit.el('span.keys', null, a.keys.map((k) => Kit.el('kbd', null, Kit.keys.label(k))))));
+    }
+    $('count').textContent = Kit.actions().length + ' actions, all described';
+  }
+  drawActions();
+  setInterval(() => { for (const row of list.children) { if (off(Kit.action.get(row.dataset.action))) row.setAttribute('aria-disabled', 'true'); else row.removeAttribute('aria-disabled'); } }, 300);
+  Kit.paletteSource((q) => ['Night Drive', 'Harbour Lights', 'Lanterns', 'Last Stage'].map((n) => ({ title: n, hint: 'Open this song', group: 'Songs', icon: 'note', run: () => say('Opening ' + n + '.') })));
+
+  /* ---- controls: segmented, switches, tabs, sliders, knobs, numbers, selects ------------------------- */
+  let tool = 'draw', side = 'Right', mon = 'mono';
+  const segOut = () => { $('seg-out').textContent = `${tool} / ${side} / ${mon}`; };
+  Kit.seg($('seg-tools'), [{ value: 'select', icon: 'select', tip: 'Select|Pick notes and move them.', keys: 'V' }, { value: 'draw', icon: 'draw', tip: 'Draw|Drag to add a note.', keys: 'B' }, { value: 'erase', icon: 'erase', tip: 'Erase|Click a note to remove it.', keys: 'E' }], (v) => { tool = v; segOut(); }, { value: 'draw' });
+  Kit.seg($('seg-side'), ['Left', 'Same', 'Right'], (v) => { side = v; segOut(); }, { value: 'Right' });
+  Kit.seg($('seg-mon'), [{ value: 'mono', label: 'Fightcade', icon: 'mono', showLabel: true, tip: 'Fightcade|Mono: what every player hears.' }, { value: 'stereo', label: 'Stereo', icon: 'stereo', showLabel: true, tip: 'Stereo|What the pans do on a board set to stereo.' }], (v) => { mon = v; segOut(); }, { value: 'mono' });
+  segOut();
+  Kit.toggle($('sw-echo'), { value: true, label: 'Echo' });
+  Kit.toggle($('sw-slur'), { value: false, label: 'Slur touching notes' });
+  Kit.toggle($('t-mute')); Kit.toggle($('t-solo')); Kit.toggle($('t-ghost'), { value: true });
+  Kit.tabs($('mini-tabs'), { value: 'part', panels: { part: $('mt-part'), note: $('mt-note'), song: $('mt-song') } });
+
+  Kit.slider($('s-vol'), { min: 0, max: 127, step: 1, value: 100, def: 100, readout: $('s-vol-v'), label: 'Volume' });
+  Kit.slider($('s-exp'), { min: 0, max: 127, step: 1, value: 58, def: 127, readout: $('s-exp-v'), label: 'Expression' });
+  Kit.slider($('s-mix'), { min: 0, max: 1, step: 0.01, value: 0.52, def: 0.5, format: Kit.fmt.pct, readout: $('s-mix-v'), label: 'Level' });
+  Kit.slider($('s-time'), { min: 0, max: 2, step: 0.05, value: 0.25, def: 0.25, format: (v) => v.toFixed(2) + ' s', readout: $('s-time-v'), label: 'Delay' });
+  Kit.slider($('s-pdelay'), { min: 0, max: 1, step: 0.125, value: 0.25, def: 0.25, format: (v) => v + ' beat', readout: $('s-pdelay-v'), label: 'Delay' });
+  Kit.seg($('seg-pside'), ['Left', 'Same', 'Right'], null, { value: 'Right' });
+  Kit.toggle($('sw-panel'), { value: true, label: 'Echo' });
+
+  const knobText = (id, fmt) => (v) => { $(id).textContent = fmt(v); };
+  const panText = (v) => (v === 0 ? 'Centre' : v < 0 ? 'L ' + -v : 'R ' + v);
+  const tuneText = (v) => Kit.fmt.signed(v) + ' c';
+  const k1 = knobText('k-level-v', String), k2 = knobText('k-pan-v', panText), k3 = knobText('k-tune-v', tuneText);
+  Kit.knob($('k-level'), { min: 0, max: 127, step: 1, value: 100, def: 100, label: 'Level', onInput: k1 }); k1(100);
+  Kit.knob($('k-pan'), { min: -64, max: 63, step: 1, value: -20, def: 0, label: 'Pan', format: panText, onInput: k2 }); k2(-20);
+  Kit.knob($('k-tune'), { min: -50, max: 50, step: 1, value: 12, def: 0, label: 'Tune', format: tuneText, onInput: k3 }); k3(12);
+
+  Kit.number($('n-voices'), { min: 1, max: 16, step: 1, value: 1, def: 1, label: 'Voices' });
+  Kit.number($('n-tempo'), { min: 30, max: 300, step: 0.5, value: 130, def: 120, format: (v) => v.toFixed(1), label: 'Tempo' });
+  Kit.number($('n-trans'), { min: -24, max: 24, step: 1, value: 0, def: 0, format: Kit.fmt.signed, label: 'Transpose' });
+  Kit.select($('sel-snap'));
+  Kit.select($('sel-scale'));
+  $('list').addEventListener('click', (e) => { const row = e.target.closest('.list-row'); if (row) $('list').querySelectorAll('.list-row').forEach((r) => r.classList.toggle('on', r === row)); });
+
+  /* ---- live meters (nothing else on the page moves by itself) and the mixer row ---------------------- */
+  const meters = $('meters'), voices = $('voices'), strips = [];
+  for (let i = 0; i < 6; i++) meters.append(Kit.el('span.meter', null, Kit.el('i')));
+  for (let i = 0; i < 16; i++) voices.append(Kit.el('i', { class: i >= 12 ? 'fx' : '' }));
+  for (const [name, role, vol, pan] of [['Break', 'drums', 100, 0], ['Kick + hats', 'perc', 84, 0], ['Bass', 'bass', 96, 0], ['Stabs', 'chords', 70, -24], ['Pad', 'pad', 56, 20], ['Lead', 'lead', 78, -12], ['Arp', 'arp', 48, 30], ['Echoes', 'fx', 60, 8]]) {
+    const mute = Kit.el('button.tog.mute', { 'data-tip': `Mute|Silences ${name}.` }, 'M'), solo = Kit.el('button.tog.solo', { 'data-tip': `Solo|Plays only ${name}.` }, 'S');
+    const knob = Kit.el('span.knob.bi'), slider = Kit.el('input.slider', { type: 'range' }), meter = Kit.el('span.meter', null, Kit.el('i'));
+    const el = Kit.el('div.mstrip', { style: { '--c': `var(--role-${role})` } }, Kit.el('div.top', null, Kit.el('b', null, name), mute, solo), Kit.el('div.low', null, knob, slider, meter));
+    $('strips').append(el);
+    Kit.knob(knob, { min: -64, max: 63, step: 1, value: pan, def: 0, format: panText, label: 'Pan ' + name });
+    Kit.slider(slider, { min: 0, max: 127, step: 1, value: vol, def: vol, label: 'Volume ' + name, onInput: (v) => { strips.find((s) => s.el === el).vol = v; } });
+    Kit.toggle(mute, { onChange: (on) => el.classList.toggle('muted', on) }); Kit.toggle(solo);
+    strips.push({ el, meter, vol });
+  }
+  function tick() {
+    const t = Date.now() / 1000;
+    meters.querySelectorAll('.meter').forEach((m, i) => m.style.setProperty('--v', (0.5 + 0.45 * Math.sin(t * (1.3 + i * 0.37) + i)).toFixed(3)));
+    voices.querySelectorAll('i').forEach((v, i) => v.style.setProperty('--v', Math.max(0, 0.55 + 0.45 * Math.sin(t * (0.9 + i * 0.21) + i * 1.7)).toFixed(3)));
+    strips.forEach((s, i) => s.meter.style.setProperty('--v', s.el.classList.contains('muted') ? 0 : (s.vol / 127 * (0.6 + 0.4 * Math.sin(t * (1.1 + i * 0.29) + i))).toFixed(3)));
+  }
+  tick(); setInterval(tick, 90);
+
+  /* ---- layers: menus, dialogs, toasts ----------------------------------------------------------------- */
+  const menuItems = () => [
+    { heading: 'Part' },
+    { label: 'Duplicate', icon: 'copy', keys: 'Ctrl D', run: () => say('Duplicated.') },
+    { label: 'Rename', keys: 'F2', run: () => say('Renaming.') },
+    { label: 'Show in Mix', icon: 'mix', run: () => say('Showing in Mix.') },
+    '-',
+    { label: 'Muted', checked: true, run: () => say('Mute toggled.') },
+    { label: 'Soloed', checked: false, run: () => say('Solo toggled.') },
+    '-',
+    { action: 'demo.undo' },
+    { label: 'Not available now', disabled: true },
+    { label: 'Delete part', icon: 'trash', danger: true, keys: 'Delete', run: () => say('Deleted.') },
+  ];
+  $('b-menu').addEventListener('click', () => Kit.menu($('b-menu'), menuItems()));
+  $('b-more').addEventListener('click', () => Kit.menu($('b-more'), [{ heading: 'Kit' }, { action: 'palette.open' }, { action: 'keymap.show' }, '-', { action: 'demo.undo' }, { action: 'demo.redo' }], { align: 'right' }));
+  $('b-select-menu').addEventListener('click', () => Kit.menu($('b-select-menu'), [{ label: 'Opened with the keyboard? The first row is lit.' }, { label: 'Use Up, Down, Enter and Esc' }, { label: 'Or type the start of a name' }]));
+  $('zone').addEventListener('contextmenu', (e) => { e.preventDefault(); Kit.menu(e, menuItems()); });
+  $('b-dialog').addEventListener('click', async () => {
+    const rate = Kit.select(Kit.el('select.field.wide', null, ['37,287 Hz (as the chip)', '44,100 Hz', '48,000 Hz'].map((t) => Kit.el('option', null, t))));
+    const loops = Kit.el('input.field.wide', { value: '2' });
+    const r = await Kit.dialog({ title: 'Export a WAV', text: 'The sound exactly as the game plays it. Nothing leaves this computer.', width: 480,
+      body: () => [Kit.el('label.lab', null, Kit.el('span', null, 'Sample rate'), Kit.el('span', { style: { width: '220px' } }, rate.el)), Kit.el('label.lab', null, Kit.el('span', null, 'Loops after the intro'), Kit.el('span', { style: { width: '220px' } }, loops))],
+      buttons: [{ label: 'Cancel', value: null }, { label: 'Export', value: 'export', primary: true }] });
+    say(r ? 'Exporting.' : 'Cancelled.');
+  });
+  $('b-confirm').addEventListener('click', async () => say((await Kit.confirm('Your song has changes that are not saved yet. Save them first?', { title: 'Leave without saving?', ok: 'Save and leave', cancel: 'Stay' })) ? 'Saved and left.' : 'Stayed.'));
+  $('b-danger').addEventListener('click', async () => say((await Kit.confirm('Lead and its 214 notes are removed. You can bring it back with Undo.', { title: 'Delete the part Lead?', ok: 'Delete', danger: true })) ? 'Deleted.' : 'Kept.'));
+  $('b-prompt').addEventListener('click', async () => { const v = await Kit.prompt('A short name, as it will show in the parts list.', { title: 'Name this part', value: 'Lead', ok: 'Rename', validate: (t) => (t.trim() ? true : 'A part needs a name.') }); say(v == null ? 'Not renamed.' : 'Renamed to ' + v + '.'); });
+  $('b-palette2').addEventListener('click', () => Kit.palette());
+  $('b-keymap').addEventListener('click', () => Kit.keymap());
+  $('b-t-info').addEventListener('click', () => Kit.toast('Tempo is 130 beats a minute.'));
+  $('b-t-good').addEventListener('click', () => Kit.toast('Saved. The song is ready for the game.', { kind: 'good' }));
+  $('b-t-warn').addEventListener('click', () => Kit.toast('15 of 16 tracks are in use.', { kind: 'warn' }));
+  $('b-t-bad').addEventListener('click', () => Kit.toast('17 tracks needed, the game has 16: the echo on Pad was left out.', { kind: 'bad' }));
+  $('b-t-act').addEventListener('click', () => Kit.toast('Part Lead was deleted.', { action: { label: 'Undo', run: () => say('Brought back.') } }));
+
+  /* ---- canvas: a ruler, rows of notes, a loop, a playhead on its own layer ----------------------------- */
+  const BAR = 192, BARS = 16, ROWS = 6, roles = ['drums', 'perc', 'bass', 'chords', 'pad', 'lead'];
+  let zoom = 1, scrollX = 0, playhead = 3 * BAR + 2 * 48 + 12;
+  const notes = roles.map((r, k) => { let s = 11 + k * 7; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647, out = []; for (let b = 0; b < BARS; b++) for (let i = 0; i < 8; i++) if (rnd() > 0.35 - k * 0.03) out.push({ t: b * BAR + i * 24, n: Math.floor(rnd() * 10), len: 12 + 12 * Math.floor(rnd() * 2) }); return out; });
+  const pxBar = () => Math.max(24, ($('cv').clientWidth - 8) / BARS) * zoom;
+  const tx = (t) => 4 + t / BAR * pxBar() - scrollX;
+  function drawCanvas(c, w, h, ctl) {
+    const css = Kit.css, RULER = 40, ROW = Math.max(28, (h - RULER) / ROWS);
+    c.fillStyle = css('--bg-0'); c.fillRect(0, 0, w, h);
+    c.fillStyle = css('--bg-1'); c.fillRect(0, 0, w, RULER);
+    c.font = css('--cv-font'); c.textBaseline = 'middle';
+    c.fillStyle = css('--cv-band'); c.fillRect(tx(0) + 1, 5, tx(8 * BAR) - tx(0) - 2, 16);
+    c.fillStyle = css('--cv-band-2'); c.fillRect(tx(8 * BAR) + 1, 5, tx(BARS * BAR) - tx(8 * BAR) - 2, 16);
+    c.fillStyle = css('--ink-2'); c.fillText('Verse', tx(0) + 7, 13.5); c.fillText('Chorus', tx(8 * BAR) + 7, 13.5);
+    c.fillStyle = css('--accent'); c.fillRect(ctl.snap(tx(2 * BAR)), 26, tx(12 * BAR) - tx(2 * BAR), 3);
+    c.font = css('--cv-mono');
+    for (let b = 0; b <= BARS; b++) {
+      const x = ctl.snap(tx(b * BAR)), major = b % 4 === 0;
+      if (x < -2 || x > w + 2) continue;
+      c.fillStyle = css(major ? '--line-2' : '--line'); c.fillRect(x, major ? 30 : RULER, 1, h);
+      if (b < BARS && (major || zoom > 1.6)) { c.fillStyle = css('--ink-3'); c.fillText(String(b + 1), x + 5, 35); }
+    }
+    c.fillStyle = css('--line'); c.fillRect(0, RULER - 1, w, 1);
+    roles.forEach((role, k) => {
+      const y = RULER + k * ROW; c.fillStyle = css('--line'); c.fillRect(0, y + ROW - 1, w, 1);
+      c.fillStyle = css('--role-' + role); c.globalAlpha = 0.9;
+      for (const n of notes[k]) { const x = tx(n.t); if (x > w || x + 40 < 0) continue; c.fillRect(x, y + 5 + (9 - n.n) * ((ROW - 14) / 10), Math.max(1.5, n.len / BAR * pxBar() - 0.5), 2.5); }
+      c.globalAlpha = 1;
+    });
+  }
+  function drawPlayhead(c, w, h) {
+    const x = Math.round(tx(playhead));
+    c.fillStyle = Kit.css('--cv-playhead'); c.fillRect(x, 22, 1, h);
+    c.beginPath(); c.moveTo(x - 5, 22); c.lineTo(x + 6, 22); c.lineTo(x + 0.5, 30); c.fill();
+  }
+  const cv = Kit.canvas($('cv'), drawCanvas, { overlay: drawPlayhead });
+  const showCanvas = () => {
+    $('c-pos').textContent = Kit.fmt.pos(playhead); $('c-zoom').textContent = zoom.toFixed(2) + 'x';
+    $('c-size').textContent = cv.w + ' x ' + cv.h; $('c-dev').textContent = $('cv').width + ' x ' + $('cv').height;
+  };
+  const redrawAll = () => { cv.invalidate(); showCanvas(); };
+  const toTick = (x) => clamp(((x + scrollX - 4) / pxBar()) * BAR, 0, BARS * BAR);
+  const maxScroll = () => Math.max(0, pxBar() * BARS - $('cv').clientWidth + 8);
+  Kit.drag($('cv'), { start: (d) => { playhead = Math.round(toTick(d.x)); cv.invalidateOverlay(); showCanvas(); return {}; }, move: (d) => { playhead = Math.round(toTick(d.x)); cv.invalidateOverlay(); showCanvas(); } });
+  Kit.wheel($('stage'), {
+    scroll: (dx, dy) => { scrollX = clamp(scrollX + (dx || dy), 0, maxScroll()); redrawAll(); },
+    zoom: (f, info) => { const t = toTick(info.x); zoom = clamp(zoom * f, 1, 8); scrollX = clamp(4 + t / BAR * pxBar() - info.x, 0, maxScroll()); redrawAll(); },
+  });
+  window.addEventListener('resize', showCanvas);
+  setTimeout(showCanvas, 60);
+
+  /* ---- split panes ---------------------------------------------------------------------------------------- */
+  const dim = (id) => Math.round($(id).offsetWidth) + ' x ' + Math.round($(id).offsetHeight);
+  const sizes = () => { $('sizeA').textContent = dim('paneA'); $('sizeTop').textContent = dim('paneTop'); $('sizeBottom').textContent = dim('paneBottom'); };
+  Kit.split($('sp1'), { target: $('paneA'), min: 120, max: () => $('splitarea').clientWidth - 180, key: 'demo.a' });
+  Kit.split($('sp2'), { target: $('paneBottom'), after: true, min: 70, max: () => $('splitarea').clientHeight - 90, key: 'demo.b' });
+  if (typeof ResizeObserver !== 'undefined') { const ro = new ResizeObserver(sizes); ['paneA', 'paneTop', 'paneBottom'].forEach((id) => ro.observe($(id))); }
+  sizes();
+
+  /* ---- storage and files ------------------------------------------------------------------------------------ */
+  const store = Kit.store('demo'), out = $('d-out');
+  const modeText = () => { const m = Kit.store.mode; $('store-mode').textContent = m === 'indexeddb' ? 'IndexedDB' : m === 'memory' ? 'In memory' : 'Opening'; $('store-mode').className = 'tag ' + (m === 'memory' ? 'warn' : m === 'indexeddb' ? 'good' : ''); };
+  async function renderKeys() {
+    const keys = (await store.keys()).sort(), box = $('d-list');
+    box.replaceChildren();
+    for (const k of keys) {
+      const v = await store.get(k);
+      box.append(Kit.el('div.list-row', { onclick: () => { $('d-key').value = k; $('d-val').value = v && v.text != null ? v.text : ''; } }, Kit.icon('note'), Kit.el('b', null, k), Kit.el('span.grow.faint', null, v && v.text != null ? String(v.text) : ''),
+        Kit.el('button.btn.icon.ghost', { 'aria-label': 'Delete ' + k, 'data-tip': 'Delete|Removes this key from the store.', onclick: async (e) => { e.stopPropagation(); await store.del(k); renderKeys(); } }, Kit.icon('trash'))));
+    }
+    if (!keys.length) box.append(Kit.el('div.empty', null, Kit.el('b', null, 'Nothing stored yet.'), Kit.el('span', null, 'Press Save.')));
+    $('d-count').textContent = keys.length + (keys.length === 1 ? ' key' : ' keys'); modeText();
+  }
+  modeText(); store.set('example', { text: 'This one was saved by the page the first time you opened it.', at: 0 }).then(renderKeys);
+  $('d-set').addEventListener('click', async () => { await store.set($('d-key').value, { text: $('d-val').value, at: Date.now() }); out.textContent = 'Saved "' + $('d-key').value + '".'; renderKeys(); });
+  $('d-get').addEventListener('click', async () => { const v = await store.get($('d-key').value); out.textContent = v === undefined ? 'Nothing is stored under "' + $('d-key').value + '".' : JSON.stringify(v, null, 1); });
+  $('d-del').addEventListener('click', async () => { await store.del($('d-key').value); out.textContent = 'Deleted "' + $('d-key').value + '".'; renderKeys(); });
+  Kit.toggle($('sw-pref'), { value: Kit.pref('demo.remember', false), onChange: (on) => Kit.pref.set('demo.remember', on) });
+
+  const fout = $('f-out');
+  const describe = async (file) => { const b = await Kit.readFile(file); fout.textContent = file.name + '\n' + Kit.fmt.bytes(b.length) + ' (' + Kit.fmt.int(b.length) + ' bytes)\nfirst bytes: ' + Array.from(b.slice(0, 12)).map((x) => x.toString(16).padStart(2, '0')).join(' '); };
+  Kit.drop($('drop'), { onDrop: (files) => describe(files[0]), onReject: () => Kit.toast('That kind of file is not used here.', { kind: 'warn' }) });
+  $('f-pick').addEventListener('click', async () => { const f = await Kit.pickFile('.json,.mid,.midi,.txt'); if (f) describe(f); });
+  $('f-dl').addEventListener('click', () => { Kit.download('kit-demo.txt', 'Written by the kit demo.\n', 'text/plain'); fout.textContent = 'Asked the browser to save kit-demo.txt.'; });
+  $('f-dir').addEventListener('click', async () => {
+    const dir = await Kit.pickFolder();
+    if (!dir) { Kit.toast('This browser cannot write into a folder, or nothing was chosen. Use Download instead.', { kind: 'warn' }); return; }
+    const names = await Kit.saveInto(dir, [{ name: 'kit-demo.txt', bytes: new TextEncoder().encode('Written by the kit demo.\n') }]);
+    fout.textContent = 'Wrote ' + names.join(', ') + ' into the folder.';
+  });
+  const fmtRow = () => {
+    const num = (id) => parseFloat($(id).value) || 0;
+    $('m-pos').textContent = Kit.fmt.pos(num('m-ticks')); $('m-name').textContent = Kit.fmt.note(num('m-note')); $('m-size').textContent = Kit.fmt.bytes(num('m-bytes'));
+    $('m-time').textContent = Kit.fmt.time(num('m-secs')); $('m-int').textContent = Kit.fmt.int(num('m-bytes'));
+    const n = Kit.fmt.parseNote($('m-byname').value); $('m-num').textContent = n == null ? 'not a note' : String(n);
+  };
+  for (const id of ['m-ticks', 'm-note', 'm-bytes', 'm-secs', 'm-byname']) $(id).addEventListener('input', fmtRow);
+  fmtRow();
+
+  /* ---- tokens: what the kit offers, read live from kit.css --------------------------------------------------- */
+  const tiles = (host, names) => { for (const n of names) { const v = Kit.css('--' + n).replace(/,\s+/g, ','); $(host).append(Kit.el('div.tile', { 'data-tip': `--${n}|${v}` }, Kit.el('span.sw', { style: { '--c': `var(--${n})` } }), Kit.el('span.nm', null, '--' + n), Kit.el('span.vl', null, v))); } };
+  tiles('tk-surf', ['bg-0', 'bg-1', 'bg-2', 'bg-3', 'bg-4', 'line', 'line-2', 'line-3']);
+  tiles('tk-ink', ['ink', 'ink-2', 'ink-3', 'ink-4']);
+  tiles('tk-mean', ['accent', 'accent-2', 'accent-soft', 'blue', 'good', 'warn', 'bad', 'focus']);
+  tiles('tk-role', ['role-drums', 'role-bass', 'role-chords', 'role-pad', 'role-lead', 'role-arp', 'role-perc', 'role-fx']);
+  tiles('tk-cv', ['cv-row', 'cv-row-black', 'cv-out-of-scale', 'cv-line-faint', 'cv-grid-faint', 'cv-band', 'cv-band-2', 'cv-row-on', 'cv-key', 'cv-key-black', 'cv-key-label', 'cv-note-inner', 'cv-selected', 'cv-playhead']);
+  for (const [n, sample] of [['t-xl', 'Calm, dense, exact'], ['t-lg', 'Calm, dense, exact'], ['t-md', 'Calm, dense, exact'], ['t-sm', 'Calm, dense, exact'], ['t-xs', 'CALM, DENSE, EXACT']]) {
+    $('tk-type').append(Kit.el('div.trow', null, Kit.el('span.nm', null, '--' + n), Kit.el('span', { style: { fontSize: `var(--${n})` } }, sample), Kit.el('span.vl', null, Kit.css('--' + n))));
+  }
+  $('tk-type').append(Kit.el('div.trow', null, Kit.el('span.nm', null, '--mono'), Kit.el('span.num', null, '9.3.24  130.0  4.1 KB'), Kit.el('span.vl', null, 'numbers')));
+  for (const n of ['s1', 's2', 's3', 's4', 's5', 's6']) $('tk-space').append(Kit.el('div.space', null, Kit.el('span.vl', { style: { fontFamily: 'var(--mono)', fontSize: 'var(--t-xs)', color: 'var(--ink-3)' } }, '--' + n), Kit.el('i', { style: { width: `var(--${n})` } })));
+
+  /* ---- the tabs (the real app passes key: 'view' so the last one comes back; a picture of this page must not depend on that) ---- */
+  const pages = {}; document.querySelectorAll('[data-page]').forEach((p) => { pages[p.dataset.page] = p; });
+  const tabs = Kit.tabs($('tabs'), { value: frag.get('tab') || 'controls', panels: pages, onPick: () => { Kit.refresh(); redrawAll(); sizes(); } });
+  redrawAll(); sizes();
+
+  /* ---- for pictures: #tab=layers&show=menu opens a layer on load ----------------------------------------------- */
+  const show = frag.get('show');
+  if (show) setTimeout(() => {
+    if (show === 'tip') { tabs.set('layers'); Kit.tip.show($('b-tip')); }
+    else if (show === 'menu') $('b-menu').click();
+    else if (show === 'select') $('sel-scale').click();
+    else if (show === 'dialog') $('b-dialog').click();
+    else if (show === 'confirm') $('b-danger').click();
+    else if (show === 'prompt') $('b-prompt').click();
+    else if (show === 'palette') Kit.run('palette.open');
+    else if (show === 'keymap') Kit.keymap();
+    else if (show === 'toasts') { $('b-t-info').click(); $('b-t-good').click(); $('b-t-warn').click(); $('b-t-bad').click(); $('b-t-act').click(); }
+  }, 120);
+})();
+</script>
+<script>
+/* #selftest: the kit's own checks in a browser (node checks/gates/g_style.js --browser runs it hidden). It drives this page and a small sandbox with
+   synthetic pointer, key and wheel events, and ends with the line "selftest: N checks, M failures" in the pre element whose id is selftest. */
+(async function () {
+  'use strict';
+  if (location.hash !== '#selftest') return;
+  const out = document.createElement('pre'); out.id = 'selftest'; document.body.append(out);
+  let n = 0, bad = 0; const lines = [];
+  const ok = (c, msg) => { n++; if (!c) { bad++; lines.push('FAIL ' + msg); } return !!c; };
+  const note = (msg) => lines.push('note: ' + msg);
+  let where = 'start';
+  const step = (name) => { where = name; out.textContent = lines.join('\n') + '\n(running: ' + name + ')'; };
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  /* the hidden browser produces one animation frame and then none (nothing is drawing to a screen), so frames are stood in for by timers */
+  window.requestAnimationFrame = (fn) => setTimeout(() => fn(performance.now()), 16);
+  const frames = (k) => sleep(20 * (k || 2));
+  const $ = (id) => document.getElementById(id);
+  const rect = (e) => e.getBoundingClientRect();
+  const body = document.body;
+  /* the hidden browser sends pointer events of its own when the layout changes; they are not part of the test, the synthetic ones are */
+  for (const type of ['pointerover', 'pointerout', 'pointerenter', 'pointerleave', 'pointermove', 'mouseover', 'mouseout', 'mousemove']) window.addEventListener(type, (e) => { if (e.isTrusted) e.stopImmediatePropagation(); }, true);
+  const tab = async (name) => { document.querySelector(`[data-tab=${name}]`).click(); await frames(); };
+  const P = (type, target, x, y, o) => target.dispatchEvent(new PointerEvent(type, Object.assign({ bubbles: true, cancelable: true, composed: true, clientX: x, clientY: y, pointerId: 7, pointerType: 'mouse', isPrimary: true, button: 0 }, o)));
+  const CODES = { ' ': 'Space', '?': 'Slash', '=': 'Equal', '-': 'Minus' };
+  const K = (target, key, o) => { const code = CODES[key] || (/^[a-z]$/i.test(key) ? 'Key' + key.toUpperCase() : /^\d$/.test(key) ? 'Digit' + key : key); const e = new KeyboardEvent('keydown', Object.assign({ key, code, bubbles: true, cancelable: true }, o)); target.dispatchEvent(e); return e; };
+  const W = (target, o) => { const e = new WheelEvent('wheel', Object.assign({ bubbles: true, cancelable: true }, o)); target.dispatchEvent(e); return e; };
+  const box = document.createElement('div');
+  box.id = 'sandbox'; box.style.cssText = 'position: fixed; left: 24px; top: 96px; width: 420px; z-index: 5; padding: 8px; background: var(--bg-2); display: flex; flex-direction: column; gap: 8px';
+  body.append(box);
+  const fresh = (el, css) => { if (css) el.style.cssText = css; box.append(el); return el; };
+  const tips = () => Array.from(document.querySelectorAll('.tip'));
+  const tipName = () => { const t = tips()[0]; return t ? t.querySelector('b').firstChild.textContent : null; };
+  const status = () => document.querySelector('.statusbar .hintline').textContent;
+  const last = () => $('last').textContent;
+  const saveSwitch = (on) => { if ($('sw-save').classList.contains('on') !== on) $('sw-save').click(); Kit.refresh(true); };
+  const closeAll = async () => { for (let i = 0; i < 6 && Kit.layers(); i++) { K(body, 'Escape'); await frames(1); } };
+  const approx = (a, b, tol) => Math.abs(a - b) <= (tol == null ? 0.5 : tol);
+
+  if (document.readyState !== 'complete') await new Promise((r) => window.addEventListener('load', r));
+  try {
+    step('the page itself');
+    ok(!!document.getElementById('kit-icons') && !!document.getElementById('i-play'), 'the icon sprite is injected');
+    ok(document.documentElement.getAttribute('data-kit') === '1', 'Kit.init ran');
+    for (const name of ['controls', 'layers', 'canvas', 'data', 'tokens']) {
+      await tab(name);
+      const page = document.querySelector(`[data-page=${name}]`);
+      ok(!page.hidden && document.querySelectorAll('[data-page]:not([hidden])').length === 1, `only the ${name} page shows`);
+      if (innerWidth < 1200) { note(`the layout checks need a window at least 1200 wide (this is ${innerWidth})`); continue; }       /* the page is made for 1280 x 720 and up */
+      ok(document.documentElement.scrollWidth <= innerWidth && body.scrollWidth <= innerWidth, `the ${name} tab scrolls sideways (${document.documentElement.scrollWidth} > ${innerWidth})`);
+      for (const c of page.querySelectorAll('.col')) {
+        ok(c.scrollWidth <= c.clientWidth + 1, `a column on the ${name} tab scrolls sideways`);
+        if (c.scrollHeight > c.clientHeight + 1) note(`a column on the ${name} tab needs scrolling at ${innerWidth} x ${innerHeight}`);
+      }
+    }
+    await tab('controls');
+    const nameless = Array.from(document.querySelectorAll('button')).filter((b) => !b.textContent.trim() && !b.getAttribute('data-tip') && !b.getAttribute('aria-label'));
+    ok(nameless.length === 0, `buttons with no text, tip or label: ${nameless.length}`);
+    ok(Kit.actions().every((a) => a.title && a.hint && a.run), 'every registered action has a title, a hint and run');
+    ok(Array.from(document.querySelectorAll('[data-tip]')).every((e) => e.getAttribute('data-tip').split('|')[0].trim()), 'every data-tip starts with a name');
+
+    step('Kit.el');
+    {
+      let clicked = 0;
+      const e = Kit.el('button.btn.primary#made', { dataset: { a: 1 }, style: { '--v': 0.5, width: '40px' }, title: 'x', onclick: () => clicked++, hidden: false, disabled: true, class: ['more', null, { off: false, on: true }] }, 'Hi ', 3, null, [Kit.el('i'), false, 'z']);
+      ok(e.tagName === 'BUTTON' && e.id === 'made' && e.classList.contains('btn') && e.classList.contains('primary') && e.classList.contains('more') && e.classList.contains('on') && !e.classList.contains('off'), 'el: tag, id and classes from the tag and from class');
+      ok(e.dataset.a === '1' && e.style.getPropertyValue('--v') === '0.5' && e.style.width === '40px' && e.title === 'x' && e.disabled === true && e.hidden === false, 'el: dataset, style with a custom property, properties');
+      ok(e.textContent === 'Hi 3z' && e.childNodes.length === 4, `el: children (${e.childNodes.length}, "${e.textContent}")`);
+      e.disabled = false; e.click(); ok(clicked === 1, 'el: on-handlers');
+      const s = Kit.icon('play', 'solid');
+      ok(s.namespaceURI === 'http://www.w3.org/2000/svg' && s.firstChild.namespaceURI === 'http://www.w3.org/2000/svg' && s.getAttribute('class') === 'ic solid' && s.firstChild.getAttribute('href') === '#i-play', 'icon: an svg that points at the symbol');
+      ok(Kit.el('div', 'text').textContent === 'text', 'el: a string as the second argument is a child');
+    }
+
+    step('tooltips and the status line');
+    await tab('layers'); await sleep(30);
+    {
+      const b = $('b-tip'), next = b.nextElementSibling, r = rect(b);
+      Kit.status('Resting words');
+      ok(status() === 'Resting words', 'status: Kit.status sets the line');
+      P('pointerover', b, r.left + 5, r.top + 5);
+      ok(/Echo/.test(status()) && /Costs one track/.test(status()), 'status: hovering shows name, sentence and note at once');
+      await sleep(200); ok(tips().length === 0, 'tip: nothing before 450 ms');
+      await sleep(300);
+      ok(tips().length === 1 && tipName() === 'Echo', 'tip: appears after 450 ms');
+      const t = tips()[0], tr = rect(t);
+      ok(t.querySelector('b kbd') && t.querySelector('b kbd').textContent === 'E' && /quieter/.test(t.querySelector('span').textContent) && /Costs one track/.test(t.querySelector('em').textContent), 'tip: name, key, sentence and dim line');
+      ok(tr.left >= 0 && tr.top >= 0 && tr.right <= innerWidth && tr.bottom <= innerHeight, 'tip: inside the window');
+      ok(tr.right <= r.left || tr.left >= r.right || tr.bottom <= r.top || tr.top >= r.bottom, 'tip: never covers its control');
+      P('pointerover', next, rect(next).left + 5, rect(next).top + 5);
+      await sleep(15);
+      ok(tips().length === 1 && tipName() === 'Quantize', `tip: moving to a neighbour is instant (${tipName()})`);
+      P('pointerover', body, 5, innerHeight - 5);
+      ok(tips().length === 0 && status() === 'Resting words', 'tip: leaving hides it and the resting status returns');
+      P('pointerover', b, r.left + 5, r.top + 5); await sleep(500); P('pointerdown', b, r.left + 5, r.top + 5);
+      ok(tips().length === 0, 'tip: pressing hides it');
+      P('pointerover', body, 5, innerHeight - 5);
+      Kit.tip.show($('b-more'));
+      const er = rect(tips()[0]);
+      ok(tips().length === 1 && er.right <= innerWidth && er.left >= 0, `tip: a control at the right edge keeps its tip in the window (${Math.round(er.right)} of ${innerWidth})`);
+      window.dispatchEvent(new Event('resize'));
+      ok(tips().length === 1, 'tip: Kit.tip.show stays through a resize');
+      Kit.tip.set($('b-more'), { name: 'Changed', text: 'New words.', keys: 'Ctrl M' });
+      ok(tipName() === 'Changed' && tips()[0].querySelector('kbd').textContent === 'Ctrl M', 'tip: Kit.tip.set redraws a showing tip');
+      Kit.tip.hide(); ok(tips().length === 0, 'tip: Kit.tip.hide');
+      Kit.tip.set($('b-more'), { name: 'Menu', text: 'A menu opened from a button. Press Esc or click away to close it.' });
+      /* a control with no room below it: the tip goes beside or above it, never over it, never off the window */
+      for (const [name, css] of [['bottom edge', 'left: 120px; bottom: 4px'], ['bottom left corner', 'left: 2px; bottom: 2px'], ['top right corner', 'right: 2px; top: 2px'], ['right edge, middle', 'right: 2px; top: 300px']]) {
+        const edge = Kit.el('button.btn', { 'data-tip': 'Edge case|A tip that has to find room next to a control at the edge of the window, without covering it.|Second line.' }, 'Edge'); edge.style.cssText = 'position: fixed; z-index: 4; ' + css; body.append(edge);
+        Kit.tip.show(edge); const er2 = rect(edge), tr2 = rect(tips()[0]);
+        ok(tr2.left >= 0 && tr2.top >= 0 && tr2.right <= innerWidth && tr2.bottom <= innerHeight, `tip: a control at the ${name} keeps its tip in the window`);
+        ok(tr2.right <= er2.left || tr2.left >= er2.right || tr2.bottom <= er2.top || tr2.top >= er2.bottom, `tip: and the tip does not cover a control at the ${name}`);
+        Kit.tip.hide(); edge.remove();
+      }
+      const wide = Kit.el('div', { 'data-tip': 'Whole area|Pointing at a big region puts the tip by the pointer.' }); wide.style.cssText = 'position: fixed; z-index: 4; left: 40px; top: 200px; width: 600px; height: 300px'; body.append(wide);
+      P('pointerover', wide, 300, 260); await sleep(500); const wt = rect(tips()[0]);
+      ok(tips().length === 1 && Math.abs(wt.left - 312) < 40 && wt.top > 260 && wt.top < 320, `tip: a big region puts the tip by the pointer (${Math.round(wt.left)}, ${Math.round(wt.top)})`);
+      P('pointerover', body, 5, innerHeight - 5); wide.remove();
+      /* disabled but explained */
+      saveSwitch(false);
+      const sb = document.querySelector('#bound button[aria-label=Save]');
+      ok(sb.getAttribute('aria-disabled') === 'true' && /^Save\|/.test(sb.getAttribute('data-tip')), 'bind: a disabled action keeps its tip and says aria-disabled');
+      P('pointerover', sb, rect(sb).left + 4, rect(sb).top + 4); await sleep(500);
+      ok(tipName() === 'Save', 'tip: a disabled bound button still explains itself');
+      P('pointerover', body, 5, innerHeight - 5);
+      saveSwitch(true);
+      ok(!sb.hasAttribute('aria-disabled'), 'bind: enabling the action enables the button');
+      Kit.status(null);
+    }
+
+    step('actions and shortcuts');
+    {
+      Kit.scope(null);
+      $('last').textContent = '-';
+      K(body, 's', { ctrlKey: true }); ok(/Save/.test(last()), `keys: Ctrl S runs Save (${last()})`);
+      K(body, 'z', { ctrlKey: true, shiftKey: true }); ok(/Redo/.test(last()), `keys: Ctrl Shift Z runs Redo (${last()})`);
+      K(body, 'y', { ctrlKey: true }); ok(/Redo/.test(last()), 'keys: a second key for the same action');
+      $('last').textContent = '-'; K(body, 'z', { ctrlKey: true, repeat: true }); ok(last() === '-', 'keys: a repeated key does not run a one-shot action');
+      K(body, 'q'); ok(/Quantize/.test(last()), 'keys: a plain letter runs its action');
+      $('last').textContent = '-'; K(body, 'q', { shiftKey: true }); ok(last() === '-', 'keys: Shift Q is not Q');
+      saveSwitch(false); $('last').textContent = '-';
+      const e = K(body, 's', { ctrlKey: true }); ok(last() === '-' && e.defaultPrevented, 'keys: a disabled action does not run, and the browser keeps its own Ctrl S away');
+      saveSwitch(true);
+      const field = $('sc-text'); field.focus(); $('last').textContent = '-';
+      K(field, 'q'); K(field, 'l'); K(field, ' '); ok(last() === '-', 'keys: a text field keeps its typing keys');
+      K(field, 's', { ctrlKey: true }); ok(/Save/.test(last()), 'keys: a text field lets Ctrl shortcuts through');
+      $('last').textContent = '-'; K(field, 'z', { ctrlKey: true }); ok(last() === '-', 'keys: a text field keeps Ctrl Z for its own undo');
+      field.blur();
+      const loopBtn = document.querySelector('#bound button[aria-label=Loop]'), playBtn = document.querySelector('#bound button[aria-label=Play]');
+      Kit.refresh(true); const loopWas = loopBtn.classList.contains('on');
+      K(body, 'l'); Kit.refresh(true);
+      ok(loopBtn.classList.contains('on') === !loopWas && loopBtn.getAttribute('aria-pressed') === String(!loopWas), 'bind: a checked action follows its state');
+      K(body, 'l'); Kit.refresh(true);
+      const info = $('b-t-info'); info.focus(); const playWas = playBtn.classList.contains('on');
+      K(info, ' '); Kit.refresh(true); ok(playBtn.classList.contains('on') === playWas, 'keys: Space on a focused button is left to the button');
+      K(body, ' '); Kit.refresh(true); ok(playBtn.classList.contains('on') === !playWas, 'keys: Space on the page runs its action');
+      K(body, ' '); Kit.refresh(true);
+      info.blur();
+      const roll = document.querySelector('[data-scope=roll]'), mixer = document.querySelector('[data-scope=mixer]');
+      roll.focus(); K(roll, 'ArrowUp'); ok(/61/.test($('sc-roll').textContent), `scope: Up in the piano roll moves the note (${$('sc-roll').textContent})`);
+      K(roll, 'ArrowUp', { repeat: true }); ok(/62/.test($('sc-roll').textContent), 'scope: an action with repeat runs on a repeated key');
+      mixer.focus(); K(mixer, 'ArrowUp'); ok($('sc-mixer').textContent === '101' && /62/.test($('sc-roll').textContent), 'scope: Up in the mixer moves the fader, not the note');
+      mixer.blur(); K(body, 'ArrowUp'); ok($('sc-mixer').textContent === '101' && /62/.test($('sc-roll').textContent), 'scope: Up elsewhere does neither');
+      Kit.scope('roll'); K(body, 'ArrowDown'); ok(/61/.test($('sc-roll').textContent), 'scope: Kit.scope makes a scope current'); Kit.scope(null);
+      /* the built-in keys */
+      K(body, 'k', { ctrlKey: true }); await frames();
+      ok(!!document.querySelector('.palette') && document.activeElement === document.querySelector('.palette input'), 'palette: Ctrl K opens it with the field focused');
+      K(body, 'k', { ctrlKey: true }); await frames(1);
+      ok(Kit.layers() === 0, 'palette: Ctrl K again closes it'); await closeAll();
+      K(body, '?', { shiftKey: true }); await frames();
+      ok(!!document.querySelector('.dialog h2') && document.querySelector('.dialog h2').textContent === 'Keyboard shortcuts', 'keymap: ? opens the key map');
+      ok(document.querySelectorAll('.dialog .keyrow').length >= Kit.actions().filter((a) => a.keys.length).length, 'keymap: a row for every action that has keys');
+      K(body, 'Escape'); await frames(1); ok(Kit.layers() === 0, 'layers: Esc closes the top one');
+    }
+
+    step('the command palette');
+    {
+      const rows = () => Array.from(document.querySelectorAll('.palette .results > button'));
+      const type = (v) => { const i = document.querySelector('.palette input'); i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); };
+      Kit.palette(); await frames();
+      ok(rows().length >= 12 && rows().some((r) => r.querySelector('.t').textContent === 'Undo') && rows().some((r) => r.querySelector('small').textContent === 'Songs'), 'palette: every action and every source is listed');
+      type('und'); ok(rows()[0].querySelector('.t').textContent === 'Undo' && !!rows()[0].querySelector('mark'), `palette: fuzzy search ranks Undo first and marks the letters (${rows()[0].querySelector('.t').textContent})`);
+      ok(rows()[0].classList.contains('on'), 'palette: the first row is selected');
+      K(body, 'ArrowDown'); ok(rows()[1] && rows()[1].classList.contains('on') && !rows()[0].classList.contains('on'), 'palette: Down moves the selection');
+      K(body, 'ArrowUp'); ok(rows()[0].classList.contains('on'), 'palette: Up moves it back');
+      type('zzzz'); ok(rows().length === 0 && /Nothing matches/.test(document.querySelector('.palette .empty').textContent), 'palette: nothing matches is said in words');
+      type('undo'); $('last').textContent = '-'; K(body, 'Enter'); await frames(1);
+      ok(/Undo/.test(last()) && Kit.layers() === 0, 'palette: Enter runs the selection and closes');
+      ok(Kit.pref('palette.recent', [])[0] === 'demo.undo', 'palette: the last choice is remembered');
+      Kit.palette(); await frames(); type('lanterns');
+      ok(rows()[0].querySelector('.t').textContent === 'Lanterns', 'palette: an item from a source');
+      K(body, 'Enter'); await frames(2);
+      ok(Array.from(document.querySelectorAll('.toast')).some((t) => /Opening Lanterns/.test(t.textContent)), 'palette: a source item runs');
+      saveSwitch(false); Kit.palette(); await frames(); type('save');
+      const sv = rows().find((r) => r.querySelector('.t').textContent === 'Save');
+      ok(sv && sv.getAttribute('aria-disabled') === 'true', 'palette: a disabled action is listed, dimmed');
+      sv && sv.click(); await frames(1); ok(Kit.layers() === 1, 'palette: a disabled action does not run and does not close it');
+      await closeAll(); saveSwitch(true);
+      const sources = []; const off = Kit.paletteSource((q) => { sources.push(q); return Promise.resolve([{ title: 'Late arrival', group: 'Test', run() {} }]); });
+      Kit.palette({ query: 'late' }); await sleep(30);
+      ok(rows().some((r) => r.querySelector('.t').textContent === 'Late arrival') && sources.includes('late'), 'palette: a source that answers later adds its items; the query option fills the field');
+      await closeAll(); off();
+      Kit.palette(); await frames(); ok(!rows().some((r) => r.querySelector('.t').textContent === 'Late arrival'), 'palette: a removed source is gone'); await closeAll();
+    }
+
+    step('menus');
+    {
+      const mb = $('b-menu'); let ran = 0, disabledRan = 0;
+      const items = () => [{ heading: 'Group' }, { label: 'Alpha', icon: 'copy', keys: 'Ctrl D', run: () => ran++ }, { label: 'Beta', run: () => ran += 10 }, '-', { label: 'Checked', checked: true }, { label: 'Unchecked', checked: false }, { label: 'Off', disabled: true, run: () => disabledRan++ }, { label: 'Danger', danger: true }, { label: 'Show more' }];
+      P('pointerdown', body, 600, innerHeight - 30);                      /* the last thing done was a click, so nothing is lit when it opens */
+      const p = Kit.menu(mb, items()); await frames();
+      const menu = document.querySelector('.menu'), btns = Array.from(menu.querySelectorAll('button')), mr = rect(menu), ar = rect(mb);
+      ok(btns.length === 7 && menu.querySelectorAll('h3').length === 1 && menu.querySelectorAll('hr').length === 1, `menu: rows, heading and line (${btns.length})`);
+      ok(mr.top >= ar.bottom && mr.left >= 0 && mr.right <= innerWidth && mr.bottom <= innerHeight, 'menu: opens below its button, inside the window');
+      ok(mb.getAttribute('aria-expanded') === 'true' && !menu.querySelector('.on'), 'menu: the anchor says aria-expanded; opened by a click nothing is lit');
+      ok(btns[0].querySelector('kbd').textContent === 'Ctrl D' && !!btns[0].querySelector('.lead svg') && btns[2].getAttribute('aria-checked') === 'true' && !!btns[2].querySelector('.lead svg') && btns[3].getAttribute('aria-checked') === 'false' && !btns[3].querySelector('.lead svg') && btns[4].getAttribute('aria-disabled') === 'true' && btns[5].classList.contains('danger'), 'menu: keys, icons, checks, disabled and danger rows');
+      K(body, 'ArrowDown'); ok(document.activeElement === btns[0] && btns[0].classList.contains('on'), 'menu: Down lights the first row');
+      K(body, 'ArrowDown'); ok(document.activeElement === btns[1] && !btns[0].classList.contains('on'), 'menu: Down again moves the light');
+      K(body, 'End'); ok(document.activeElement === btns[6], 'menu: End goes to the last enabled row');
+      K(body, 'ArrowDown'); ok(document.activeElement === btns[0], 'menu: Down wraps round');
+      K(body, 'ArrowUp'); ok(document.activeElement === btns[6], 'menu: Up wraps the other way');
+      K(body, 'ArrowUp'); K(body, 'ArrowUp'); ok(document.activeElement === btns[3], 'menu: Up from the row after a disabled one skips it');
+      K(body, 's'); K(body, 'h'); K(body, 'o'); K(body, 'w'); ok(document.activeElement === btns[6], `menu: typing the start of a name finds it (${document.activeElement.textContent})`);
+      K(body, 'Home'); K(body, 'Enter'); await frames(1);
+      const picked = await p;
+      ok(picked && picked.label === 'Alpha' && ran === 1 && Kit.layers() === 0, 'menu: Enter runs the row, closes, and the promise gives the item');
+      const q = Kit.menu(mb, items()); await frames(); btns[5].click(); ok(disabledRan === 0 && Kit.layers() === 1, 'menu: a disabled row does nothing and the menu stays');
+      const q2 = Kit.menu(mb, items()); await frames(); ok(Kit.layers() === 0 && (await q) === null && (await q2) === null, 'menu: opening it from the same button again closes it');
+      const r3 = Kit.menu(mb, items()); await frames();
+      P('pointerdown', mb, ar.left + 3, ar.top + 3); ok(Kit.layers() === 1, 'menu: pressing its own button is not a click-away');
+      P('pointerdown', body, 500, innerHeight - 20); await frames(1); ok(Kit.layers() === 0 && (await r3) === null, 'menu: a click elsewhere closes it');
+      const r4 = Kit.menu(mb, items()); await frames(); K(body, 'Escape'); await frames(1); ok(Kit.layers() === 0 && (await r4) === null, 'menu: Esc closes it');
+      const r5 = Kit.menu({ x: innerWidth - 4, y: 150 }, items()); await frames();
+      const m5 = rect(document.querySelector('.menu')); ok(m5.right <= innerWidth && m5.left < innerWidth - 4 - 50 && m5.top >= 150 - 1, `menu: at a point it flips left at the right edge (${Math.round(m5.left)}..${Math.round(m5.right)})`);
+      await closeAll(); await r5;
+      const r6 = Kit.menu({ x: 200, y: innerHeight - 6 }, items()); await frames();
+      const m6 = rect(document.querySelector('.menu')); ok(m6.bottom <= innerHeight && m6.top >= 0, 'menu: at the bottom edge it opens upward'); await closeAll(); await r6;
+      /* a menu fills in what an action knows */
+      const am = Kit.menu(mb, [{ action: 'demo.undo' }, { action: 'demo.play' }]); await frames();
+      const ab = Array.from(document.querySelectorAll('.menu button'));
+      ok(ab[0].textContent.startsWith('Undo') && ab[0].querySelector('kbd').textContent === 'Ctrl Z' && ab[1].getAttribute('aria-checked') !== null, 'menu: an action gives label, key and checked');
+      $('last').textContent = '-'; ab[0].click(); await am; ok(/Undo/.test(last()), 'menu: an action row runs the action');
+      /* Kit.select */
+      let picks = []; const host = fresh(Kit.el('select.field', null, ['One', 'Two', 'Three'].map((t, i) => Kit.el('option', { value: 'v' + i, selected: i === 1 }, t))), 'width: 160px');
+      const sel = Kit.select(host, null, { onPick: (v, o) => picks.push([v, o.label]) });
+      ok(sel.get() === 'v1' && sel.el.textContent === 'Two' && sel.el.tagName === 'BUTTON' && sel.el.classList.contains('select'), 'select: a <select> becomes a drop-down button with its options and choice');
+      sel.el.click(); await frames();
+      const sm = Array.from(document.querySelectorAll('.menu button'));
+      ok(sm.length === 3 && sm[1].getAttribute('aria-checked') === 'true' && rect(document.querySelector('.menu')).width >= rect(sel.el).width - 1, 'select: its menu lists the options, checks the current one, is as wide as the button');
+      sm[2].click(); await frames(1);
+      ok(sel.get() === 'v2' && sel.el.textContent === 'Three' && JSON.stringify(picks) === '[["v2","Three"]]', 'select: choosing sets it and calls onPick');
+      sel.set('v0', true); ok(sel.el.textContent === 'One' && picks.length === 1, 'select: set(value, true) is silent');
+      K(sel.el, 'ArrowDown'); await frames(); ok(!!document.querySelector('.menu'), 'select: Down opens it'); await closeAll();
+      sel.setOptions([{ value: 'a', label: 'A' }], 'a'); ok(sel.el.textContent === 'A', 'select: setOptions');
+      host.remove(); sel.el.remove();
+    }
+
+    step('dialogs');
+    {
+      const opener = $('b-dialog'); opener.focus();
+      let checked = 0;
+      const input = Kit.el('input.field', { id: 'dlg-in' });
+      const p = Kit.dialog({ title: 'Title words', text: 'Some text.', body: [input], buttons: [{ label: 'No', value: false }, { label: 'Yes', value: 'yes', primary: true, check: () => ++checked > 1 }] }); await frames();
+      const dlg = document.querySelector('.dialog'), foot = dlg.querySelectorAll('footer button');
+      ok(dlg.getAttribute('role') === 'dialog' && dlg.getAttribute('aria-modal') === 'true' && dlg.getAttribute('aria-labelledby') === dlg.querySelector('h2').id, 'dialog: role, modal and a label');
+      ok(document.activeElement === foot[1], 'dialog: the primary button has the focus');
+      foot[1].focus(); K(foot[1], 'Tab'); ok(document.activeElement === input || document.activeElement === foot[0] || dlg.contains(document.activeElement), 'dialog: Tab stays inside');
+      foot[1].focus(); const e1 = K(foot[1], 'Tab'); ok(e1.defaultPrevented && document.activeElement !== foot[1] && dlg.contains(document.activeElement), 'dialog: Tab from the last control wraps to the first');
+      input.focus(); const e2 = K(input, 'Tab', { shiftKey: true }); ok(e2.defaultPrevented && dlg.contains(document.activeElement) && document.activeElement !== input, 'dialog: Shift Tab from the first wraps to the last');
+      P('pointerdown', dlg, 5, 5); ok(Kit.layers() === 1, 'dialog: pressing inside does not close it');
+      K(input, 'Enter'); await frames(1); ok(Kit.layers() === 1 && checked === 1, 'dialog: check() returning false keeps it open');
+      K(input, 'Enter'); await frames(1);
+      ok((await p) === 'yes' && Kit.layers() === 0 && document.activeElement === opener, 'dialog: Enter presses the primary button, the promise gives its value, focus goes back');
+      const p2 = Kit.dialog({ title: 'Esc', buttons: [{ label: 'OK', value: 1, primary: true }] }); await frames(); K(body, 'Escape'); ok((await p2) === null, 'dialog: Esc gives null');
+      const p3 = Kit.dialog({ title: 'Away', buttons: [{ label: 'OK', value: 1, primary: true }] }); await frames(); P('pointerdown', document.querySelector('.scrim'), 3, 3); ok((await p3) === null, 'dialog: a click outside gives null');
+      const p4 = Kit.dialog({ title: 'Firm', dismiss: false, buttons: [{ label: 'OK', value: 1, primary: true }] }); await frames(); K(body, 'Escape'); P('pointerdown', document.querySelector('.scrim'), 3, 3);
+      ok(Kit.layers() === 1, 'dialog: dismiss false ignores Esc and outside clicks'); p4.close('forced'); ok((await p4) === 'forced', 'dialog: promise.close(value)');
+      const p5 = Kit.dialog({ body: (ctx) => Kit.el('button.btn', { id: 'inner', onclick: () => ctx.close('inner') }, 'Inner'), buttons: [] }); await frames(); $('inner').click(); ok((await p5) === 'inner', 'dialog: a body function gets ctx.close');
+      const c1 = Kit.confirm('Sure?'); await frames(); Array.from(document.querySelectorAll('.dialog footer button')).find((b) => b.textContent === 'Cancel').click(); ok((await c1) === false, 'confirm: Cancel gives false');
+      const c2 = Kit.confirm('Sure?'); await frames(); Array.from(document.querySelectorAll('.dialog footer button')).find((b) => b.textContent === 'OK').click(); ok((await c2) === true, 'confirm: OK gives true');
+      const c3 = Kit.confirm('Sure?', { danger: true, ok: 'Delete' }); await frames();
+      ok(document.activeElement.textContent === 'Cancel' && document.querySelector('.dialog .btn.primary.danger').textContent === 'Delete', 'confirm: a destructive one starts on Cancel');
+      K(body, 'Escape'); ok((await c3) === false, 'confirm: Esc gives false');
+      const pr = Kit.prompt('Name it', { value: 'ab', validate: (v) => v.length > 2 || 'Too short.' }); await frames();
+      const pin = document.querySelector('.dialog input'), perr = document.querySelector('.dialog .hint.bad');
+      ok(document.activeElement === pin && pin.value === 'ab' && perr.hidden, 'prompt: the field has the focus and its value');
+      K(pin, 'Enter'); await frames(1);
+      ok(Kit.layers() === 1 && !perr.hidden && perr.textContent === 'Too short.' && pin.classList.contains('invalid'), 'prompt: a refused value says why and stays open');
+      pin.value = 'abcd'; pin.dispatchEvent(new Event('input', { bubbles: true })); ok(perr.hidden && !pin.classList.contains('invalid'), 'prompt: typing clears the message');
+      K(pin, 'Enter'); ok((await pr) === 'abcd', 'prompt: Enter gives the text');
+      const pr2 = Kit.prompt('Name it'); await frames(); K(body, 'Escape'); ok((await pr2) === null, 'prompt: Esc gives null');
+      const al = Kit.alert('All fine.'); await frames(); ok(/All fine/.test(document.querySelector('.dialog').textContent), 'alert: shows the text'); K(document.activeElement, 'Escape'); await al;
+      /* two layers: a menu over a dialog */
+      const d6 = Kit.dialog({ title: 'Under', body: Kit.el('button.btn', { id: 'under-b' }, 'Open'), buttons: [{ label: 'OK', value: 1 }] }); await frames();
+      const m6 = Kit.menu($('under-b'), [{ label: 'Over' }]); await frames(); ok(Kit.layers() === 2, 'layers: a menu opens over a dialog');
+      K(body, 'Escape'); await frames(1); ok(Kit.layers() === 1, 'layers: Esc closes only the top one'); K(body, 'Escape'); await d6; await m6;
+    }
+
+    step('toasts');
+    {
+      const shown = (text) => Array.from(document.querySelectorAll('.toasts .toast:not(.out)')).filter((t) => t.textContent.includes(text));
+      document.querySelectorAll('.toasts .toast').forEach((t) => t.remove());                 /* the messages the earlier checks caused */
+      Kit.toast('Quick one', { ms: 300 }); await frames(); ok(shown('Quick one').length === 1, 'toast: appears');
+      await sleep(600); ok(shown('Quick one').length === 0, 'toast: goes after its time');
+      Kit.toast('Held', { ms: 300 }); await frames(); const held = shown('Held')[0];
+      held.dispatchEvent(new PointerEvent('pointerenter')); await sleep(900); ok(shown('Held').length === 1, 'toast: stays while the pointer is on it');
+      held.dispatchEvent(new PointerEvent('pointerleave')); await sleep(1900); ok(shown('Held').length === 0, 'toast: goes after the pointer leaves');
+      let acted = 0; Kit.toast('With action', { ms: 0, action: { label: 'Undo it', run: () => acted++ } }); await frames();
+      const ta = shown('With action')[0]; Array.from(ta.querySelectorAll('button')).find((b) => b.textContent === 'Undo it').click(); await sleep(300);
+      ok(acted === 1 && shown('With action').length === 0, 'toast: the action runs and closes it');
+      for (const kind of ['info', 'good', 'warn', 'bad']) { Kit.toast('Kind ' + kind, { kind, ms: 0 }); }
+      await frames(); ok(['info', 'good', 'warn', 'bad'].every((k) => shown('Kind ' + k)[0] && shown('Kind ' + k)[0].classList.contains(k)), 'toast: a class for each kind');
+      Kit.toast('Fifth', { ms: 0 }); await frames();
+      ok(document.querySelectorAll('.toasts .toast:not(.out)').length <= 4 && shown('Fifth').length === 1 && shown('Kind info').length === 0, 'toast: at most four, the oldest goes');
+      const closer = Kit.toast('Closable', { ms: 0 }); closer.close(); await sleep(300); ok(shown('Closable').length === 0, 'toast: the handle closes it');
+      Array.from(document.querySelectorAll('.toasts .toast')).forEach((t) => t.remove());
+    }
+
+    step('sliders');
+    {
+      const inp = fresh(Kit.el('input.slider', { type: 'range' }), 'width: 212px'); const readout = fresh(Kit.el('span'));
+      const rec = { inputs: [], commits: [] };
+      const s = Kit.slider(inp, { min: 0, max: 100, step: 1, value: 50, def: 25, readout, format: (v) => v + '%', onInput: (v, i) => rec.inputs.push([v, i.fine]), onCommit: (v) => rec.commits.push(v) });
+      const r = rect(inp), x0 = r.left + 6, wv = r.width - 12, y = r.top + 2, X = (f) => x0 + wv * f;
+      ok(s.get() === 50 && readout.textContent === '50%' && inp.getAttribute('aria-valuetext') === '50%' && /0\.5000/.test(inp.style.getPropertyValue('--fill')), 'slider: value, readout, aria and the fill to the thumb');
+      P('pointerdown', inp, X(0.8), y); ok(s.get() === 80, `slider: a click on the track jumps there (${s.get()})`);
+      P('pointermove', inp, X(0.9), y); ok(s.get() === 90 && rec.inputs[rec.inputs.length - 1][1] === false, 'slider: dragging follows the pointer');
+      P('pointermove', inp, X(2), y); ok(s.get() === 100, 'slider: dragging stops at the end');
+      P('pointerup', inp, X(2), y); ok(rec.commits.length === 1 && rec.commits[0] === 100, 'slider: letting go commits once');
+      P('pointerdown', inp, X(1), y); P('pointermove', inp, X(1) - 20, y, { shiftKey: true }); P('pointermove', inp, X(1) - 20 - wv * 0.5, y, { shiftKey: true });
+      ok(approx(s.get(), 95, 0) && rec.inputs[rec.inputs.length - 1][1] === true, `slider: Shift drags a tenth as fast (${s.get()})`);
+      P('pointerup', inp, X(0.5), y);
+      inp.dispatchEvent(new MouseEvent('dblclick', { bubbles: true })); ok(s.get() === 25 && rec.commits[rec.commits.length - 1] === 25, 'slider: double-click gives the default');
+      inp.focus(); K(inp, 'ArrowRight', { shiftKey: true }); ok(s.get() === 26 && rec.inputs[rec.inputs.length - 1][1] === true, 'slider: Shift and an arrow is the fine step');
+      inp.blur(); const w1 = W(inp, { deltaY: -100 }); ok(s.get() === 26 && !w1.defaultPrevented, 'slider: the wheel without focus is left to the page');
+      inp.focus(); const w2 = W(inp, { deltaY: -100 }); ok(s.get() === 27 && w2.defaultPrevented, 'slider: the wheel with focus moves it a step');
+      W(inp, { deltaY: 100 }); ok(s.get() === 26, 'slider: the wheel down');
+      W(inp, { deltaY: -10 }); W(inp, { deltaY: -10 }); W(inp, { deltaY: -10 }); W(inp, { deltaY: -10 }); ok(s.get() === 27, 'slider: small trackpad steps add up to one');
+      W(inp, { deltaMode: 1, deltaY: -3 }); ok(s.get() === 28, 'slider: a wheel counted in lines is one step');
+      s.set(500); ok(s.get() === 100, 'slider: set clamps'); s.set(33.4); ok(s.get() === 33, 'slider: set snaps to the step');
+      const n0 = rec.inputs.length; s.set(10, true); ok(rec.inputs.length === n0 && s.get() === 10 && readout.textContent === '10%', 'slider: set(v, true) is silent but redraws');
+      await sleep(400); ok(rec.commits.length >= 3, 'slider: keys and the wheel commit a moment after the last change');
+      const hover = fresh(Kit.el('input.slider', { type: 'range' }), 'width: 150px'); const hs = Kit.slider(hover, { min: 0, max: 10, step: 1, value: 5, wheel: 'hover' });
+      W(hover, { deltaY: -100 }); ok(hs.get() === 6, 'slider: wheel: "hover" works without focus');
+      const fl = fresh(Kit.el('input.slider', { type: 'range' }), 'width: 150px'); const fs = Kit.slider(fl, { min: 0, max: 1, step: 0.01, value: 0.5 });
+      fl.focus(); K(fl, 'ArrowRight', { shiftKey: true }); ok(approx(fs.get(), 0.501, 1e-9), `slider: a fine step below the step's own grid (${fs.get()})`);
+      fs.set(0.7); ok(approx(fs.get(), 0.7, 1e-9), 'slider: decimal steps stay clean');
+      for (const e of [inp, readout, hover, fl]) e.remove();
+    }
+
+    step('knobs');
+    {
+      const k = fresh(Kit.el('span.knob.bi'), 'width: 40px; height: 40px'); const rec = [], com = [];
+      const kn = Kit.knob(k, { min: -50, max: 50, step: 1, value: 0, def: 0, label: 'Pan', format: (v) => 'p' + v, onInput: (v, i) => rec.push([v, i.fine]), onCommit: (v) => com.push(v) });
+      const r = rect(k), cx = r.left + 20, cy = r.top + 20;
+      ok(k.getAttribute('role') === 'slider' && k.tabIndex === 0 && k.getAttribute('aria-valuenow') === '0' && k.getAttribute('aria-valuetext') === 'p0' && k.getAttribute('aria-label') === 'Pan' && k.style.getPropertyValue('--v') === '0.5000', 'knob: role, focusable, aria and the arc position');
+      P('pointerdown', k, cx, cy); P('pointermove', k, cx, cy - 40); ok(kn.get() === 25, `knob: dragging up raises it by a quarter of the range per 40 px (${kn.get()})`);
+      ok(document.body.getAttribute('data-cursor') === 'ns', 'knob: the cursor says up and down while dragging');
+      P('pointermove', k, cx, cy + 200); ok(kn.get() === -50, 'knob: dragging down stops at the minimum');
+      P('pointerup', k, cx, cy + 200); ok(com.length === 1 && com[0] === -50 && !document.body.hasAttribute('data-cursor'), 'knob: letting go commits and gives the cursor back');
+      P('pointerdown', k, cx, cy); P('pointermove', k, cx, cy - 10, { shiftKey: true }); P('pointermove', k, cx, cy - 10 - 80, { shiftKey: true }); P('pointerup', k, cx, cy);
+      ok(kn.get() === -50 + 5 && rec[rec.length - 1][1] === true, `knob: Shift moves a tenth as fast (${kn.get()})`);
+      k.dispatchEvent(new MouseEvent('dblclick', { bubbles: true })); ok(kn.get() === 0, 'knob: double-click gives the default');
+      k.focus(); K(k, 'ArrowUp'); ok(kn.get() === 1, 'knob: Up'); K(k, 'ArrowDown', { shiftKey: true }); ok(kn.get() === 0, 'knob: Shift and Down is the fine step');
+      K(k, 'PageUp'); ok(kn.get() === 10, 'knob: Page Up is ten steps'); K(k, 'End'); ok(kn.get() === 50, 'knob: End'); K(k, 'Home'); ok(kn.get() === -50, 'knob: Home');
+      W(k, { deltaY: -100 }); ok(kn.get() === -49, 'knob: the wheel with focus');
+      k.blur(); W(k, { deltaY: -100 }); ok(kn.get() === -49, 'knob: the wheel without focus does nothing');
+      const bi = k.matches('.bi'); ok(bi, 'knob: .bi is kept'); k.remove();
+    }
+
+    step('number fields');
+    {
+      const inp = fresh(Kit.el('input.field.num'), 'width: 90px'); const rec = [], com = [];
+      const nf = Kit.number(inp, { min: 0, max: 100, step: 1, value: 10, def: 10, label: 'Amount', format: (v) => v + ' u', onInput: (v) => rec.push(v), onCommit: (v) => com.push(v) });
+      ok(inp.value === '10 u' && inp.type === 'text' && inp.classList.contains('scrub') && inp.getAttribute('role') === 'spinbutton' && inp.getAttribute('aria-valuenow') === '10', 'number: formatted text, role and aria');
+      inp.focus(); inp.value = '42'; K(inp, 'Enter'); ok(nf.get() === 42 && inp.value === '42 u' && com[com.length - 1] === 42, 'number: type and Enter commits');
+      inp.value = 'abc'; inp.dispatchEvent(new Event('input', { bubbles: true })); ok(inp.classList.contains('invalid'), 'number: text that is not a number is marked');
+      inp.blur(); ok(nf.get() === 42 && inp.value === '42 u' && !inp.classList.contains('invalid'), 'number: leaving with nonsense puts it back');
+      inp.focus(); K(inp, 'ArrowUp'); ok(nf.get() === 43, 'number: Up'); K(inp, 'ArrowDown'); K(inp, 'ArrowDown'); ok(nf.get() === 41, 'number: Down');
+      K(inp, 'PageUp'); ok(nf.get() === 51, 'number: Page Up is ten steps');
+      inp.value = '999'; K(inp, 'Enter'); ok(nf.get() === 100, 'number: a typed value is clamped');
+      inp.value = '77'; K(inp, 'Escape'); ok(nf.get() === 100 && inp.value === '100 u' && document.activeElement !== inp, 'number: Esc puts it back and leaves the field');
+      const r = rect(inp), cy = r.top + 10, cx = r.left + 20; nf.set(10);
+      P('pointerdown', inp, cx, cy); P('pointermove', inp, cx + 2, cy); ok(nf.get() === 10, 'number: a small movement is not a scrub');
+      P('pointermove', inp, cx + 40, cy); ok(nf.get() === 20 && document.body.getAttribute('data-cursor') === 'ew', `number: dragging sideways scrubs, 4 px a step (${nf.get()})`);
+      P('pointerup', inp, cx + 40, cy); ok(com[com.length - 1] === 20 && !document.body.hasAttribute('data-cursor'), 'number: the scrub commits when you let go');
+      P('pointerdown', inp, cx, cy); P('pointermove', inp, cx + 8000, cy); P('pointerup', inp, cx, cy); ok(nf.get() === 100, 'number: a scrub stops at the maximum');
+      nf.set(10); P('pointerdown', inp, cx, cy); P('pointerup', inp, cx, cy); await frames(); ok(document.activeElement === inp && nf.get() === 10, 'number: a click without moving focuses the field');
+      P('pointerdown', inp, cx, cy); P('pointermove', inp, cx + 40, cy); P('pointerup', inp, cx, cy); ok(nf.get() === 10, 'number: a focused field is not scrubbed, its text is edited');
+      inp.blur(); nf.set(10);
+      P('pointerdown', inp, cx, cy); P('pointermove', inp, cx + 30, cy); K(body, 'Escape'); ok(nf.get() === 10, 'number: Esc in the middle of a scrub puts it back');
+      inp.blur(); inp.remove();
+      const dec = fresh(Kit.el('input.field.num')); const dn = Kit.number(dec, { min: 0, max: 2, step: 0.5, value: 1, format: (v) => v.toFixed(2) });
+      ok(dec.value === '1.00', 'number: decimals through format'); dec.focus(); dec.value = '1.25'; K(dec, 'Enter'); ok(dn.get() === 1.25, `number: a typed value keeps the fine step (${dn.get()})`); dec.remove();
+    }
+
+    step('segmented, toggle, tabs');
+    {
+      const host = fresh(Kit.el('div')); const picks = [];
+      const sg = Kit.seg(host, [{ value: 'a', label: 'A', tip: 'Alpha|The first.' }, 'b', { value: 'c', icon: 'play', title: 'Play' }], (v, o) => picks.push([v, o.value]), { value: 'b' });
+      const bs = host.querySelectorAll('button');
+      ok(host.classList.contains('seg') && bs.length === 3 && bs[1].classList.contains('on') && bs[1].getAttribute('aria-checked') === 'true' && bs[1].tabIndex === 0 && bs[0].tabIndex === -1 && bs[0].getAttribute('data-tip') === 'Alpha|The first.', 'seg: buttons, the chosen one on, a roving tab stop, tips');
+      ok(!!bs[2].querySelector('svg') && bs[2].getAttribute('aria-label') === 'Play', 'seg: an icon option is named for screen readers');
+      bs[2].click(); ok(sg.get() === 'c' && bs[2].classList.contains('on') && !bs[1].classList.contains('on') && picks.length === 1, 'seg: clicking chooses and calls onPick');
+      bs[2].focus(); K(bs[2], 'ArrowLeft'); ok(sg.get() === 'b' && document.activeElement === bs[1], 'seg: Left chooses the previous and moves the focus');
+      K(bs[1], 'ArrowRight'); K(bs[2], 'ArrowRight'); ok(sg.get() === 'a', 'seg: Right wraps round');
+      sg.set('c', true); ok(sg.get() === 'c' && picks.length === 4 && bs[2].classList.contains('on'), 'seg: set(v, true) is silent');
+      sg.setOptions(['x', 'y'], 'y'); ok(host.querySelectorAll('button').length === 2 && sg.get() === 'y', 'seg: setOptions');
+      const ad = fresh(Kit.el('div', null, Kit.el('button', { 'data-value': 'p' }, 'P'), Kit.el('button.on', null, 'Q'))); const ap = [];
+      const as = Kit.seg(ad, null, (v) => ap.push(v));
+      ok(as.get() === 1 && ad.firstChild.getAttribute('role') === 'radio', 'seg: it adopts buttons already in the element'); ad.firstChild.click(); ok(as.get() === 'p' && ap[0] === 'p', 'seg: adopted buttons work'); host.remove(); ad.remove();
+      /* toggle */
+      const sw = fresh(Kit.el('span.switch')); const ch = []; const tg = Kit.toggle(sw, { onChange: (v) => ch.push(v), label: 'Echo' });
+      ok(sw.getAttribute('role') === 'switch' && sw.tabIndex === 0 && sw.getAttribute('aria-checked') === 'false' && sw.getAttribute('aria-label') === 'Echo' && !sw.classList.contains('on'), 'toggle: a switch has its role, a tab stop and aria-checked');
+      sw.click(); ok(tg.get() === true && sw.classList.contains('on') && sw.getAttribute('aria-checked') === 'true' && ch[0] === true, 'toggle: click');
+      K(sw, ' '); ok(tg.get() === false && ch[1] === false, 'toggle: Space'); K(sw, 'Enter'); ok(tg.get() === true, 'toggle: Enter');
+      tg.set(false, true); ok(!sw.classList.contains('on') && ch.length === 3, 'toggle: set(v, true) is silent');
+      const lab = fresh(Kit.el('label.lab', null, Kit.el('span', null, 'Words'), Kit.el('span.switch'))); const lt = Kit.toggle(lab.querySelector('.switch'));
+      lab.firstChild.click(); ok(lt.get() === true, 'toggle: the words of a labelled switch toggle it'); lab.querySelector('.switch').click(); ok(lt.get() === false, 'toggle: the switch itself toggles once, not twice');
+      const tb = fresh(Kit.el('button.btn', null, 'Go')); const tbt = Kit.toggle(tb, { value: true });
+      ok(tb.classList.contains('on') && tb.getAttribute('aria-pressed') === 'true' && tb.getAttribute('role') === 'button', 'toggle: a button is pressed, not a switch'); sw.remove(); lab.remove(); tb.remove();
+      /* tabs */
+      const th = fresh(Kit.el('div.tabs', null, Kit.el('button', { 'data-tab': 'a' }, 'A'), Kit.el('button', { 'data-tab': 'b' }, 'B'), Kit.el('button', { 'data-tab': 'c' }, 'C'), Kit.el('div.right', null, 'x')));
+      const pa = Kit.el('p', null, 'pa'), pb = Kit.el('p', null, 'pb'); fresh(pa); fresh(pb); const tp = [];
+      const tt = Kit.tabs(th, { value: 'a', panels: { a: pa, b: pb }, onPick: (v) => tp.push(v), key: 'st_tabs' });
+      const tbs = th.querySelectorAll(':scope > button');
+      ok(th.getAttribute('role') === 'tablist' && tbs[0].classList.contains('on') && tbs[0].getAttribute('aria-selected') === 'true' && tbs[1].tabIndex === -1 && !pa.hidden && pb.hidden, 'tabs: roles, the first on, its panel shown, the other hidden');
+      tbs[1].click(); ok(tt.get() === 'b' && pa.hidden && !pb.hidden && tp[0] === 'b', 'tabs: clicking shows the panel and calls onPick');
+      K(tbs[1], 'ArrowRight'); ok(tt.get() === 'c' && document.activeElement === tbs[2], 'tabs: Right moves and focuses'); K(tbs[2], 'ArrowRight'); ok(tt.get() === 'a', 'tabs: Right wraps'); K(tbs[0], 'End'); ok(tt.get() === 'c', 'tabs: End');
+      tt.set('b', true); ok(tt.get() === 'b' && tp.length === 4, 'tabs: set(v, true) is silent');
+      const th2 = fresh(Kit.el('div.tabs', null, Kit.el('button', { 'data-tab': 'a' }, 'A'), Kit.el('button', { 'data-tab': 'b' }, 'B')));
+      ok(Kit.tabs(th2, { key: 'st_tabs' }).get() === 'b', 'tabs: key remembers the last one'); Kit.pref.del('tabs.st_tabs'); th.remove(); th2.remove(); pa.remove(); pb.remove();
+    }
+
+    step('split panes');
+    {
+      const sheet = Kit.el('style', null, '.st-a { width: 100px; }'); document.head.append(sheet);        /* the size a stylesheet gives; the split overrides it and reset gives it back */
+      const row = fresh(Kit.el('div'), 'display: flex; width: 400px; height: 60px'); const A = Kit.el('div.st-a', null, 'A'), bar = Kit.el('div.splitter.v'), B = Kit.el('div', null, 'B');
+      B.style.flex = '1 1 auto'; row.append(A, bar, B);
+      Kit.pref.del('split.st_split');
+      const sp = Kit.split(bar, { target: A, min: 50, max: 300, key: 'st_split' });
+      const r = rect(bar), y = r.top + 30, x = r.left;
+      ok(bar.getAttribute('role') === 'separator' && bar.tabIndex === 0 && bar.getAttribute('aria-orientation') === 'vertical', 'split: a focusable separator');
+      P('pointerdown', bar, x, y); ok(bar.classList.contains('drag') && document.body.getAttribute('data-cursor') === 'col', 'split: .drag and the column cursor while dragging');
+      P('pointermove', bar, x + 60, y); ok(rect(A).width === 160, `split: dragging resizes the target (${rect(A).width})`);
+      P('pointermove', bar, x + 1000, y); ok(rect(A).width === 300, 'split: it stops at max'); P('pointermove', bar, x - 1000, y); ok(rect(A).width === 50, 'split: and at min');
+      P('pointermove', bar, x + 60, y); P('pointerup', bar, x + 60, y);
+      ok(!bar.classList.contains('drag') && !document.body.hasAttribute('data-cursor') && Kit.pref('split.st_split', null) === 160, 'split: letting go remembers the size');
+      const row2 = fresh(Kit.el('div'), 'display: flex; width: 400px; height: 40px'); const A2 = Kit.el('div.st-a'), bar2 = Kit.el('div.splitter.v'); row2.append(A2, bar2, Kit.el('div'));
+      Kit.split(bar2, { target: A2, min: 50, max: 300, key: 'st_split' }); ok(rect(A2).width === 160, 'split: a new split with the same key starts at the remembered size');
+      K(bar, 'ArrowRight'); ok(rect(A).width === 176, 'split: Right moves it 16 px'); K(bar, 'ArrowLeft', { shiftKey: true }); ok(rect(A).width === 112, 'split: Shift moves it 64 px');
+      K(bar, 'End'); ok(rect(A).width === 300, 'split: End goes to max'); K(bar, 'Home'); ok(rect(A).width === 50, 'split: Home goes to min');
+      P('pointerdown', bar, x, y); P('pointermove', bar, x + 90, y); K(body, 'Escape'); ok(rect(A).width === 50 && !bar.classList.contains('drag'), 'split: Esc during a drag puts it back');
+      bar.dispatchEvent(new MouseEvent('dblclick', { bubbles: true })); ok(rect(A).width === 100 && Kit.pref('split.st_split', null) === null, 'split: double-click resets and forgets');
+      /* a CSS variable, and the other side */
+      const grid = fresh(Kit.el('div'), 'display: flex; flex-direction: column; width: 200px; height: 300px'); const top = Kit.el('div'), hb = Kit.el('div.splitter.h'), low = Kit.el('div');
+      top.style.flex = '1 1 auto'; low.style.height = 'var(--low, 100px)'; low.style.flex = 'none'; grid.append(top, hb, low);
+      Kit.split(hb, { var: '--low', host: grid, measure: low, after: true, min: 40, max: 200 });
+      const hr = rect(hb); P('pointerdown', hb, hr.left + 5, hr.top); P('pointermove', hb, hr.left + 5, hr.top - 50); P('pointerup', hb, hr.left + 5, hr.top - 50);
+      ok(grid.style.getPropertyValue('--low') === '150px' && rect(low).height === 150, `split: a variable, and dragging away from the next pane grows it (${grid.style.getPropertyValue('--low')})`);
+      Kit.pref.del('split.st_split'); row.remove(); row2.remove(); grid.remove(); sheet.remove();
+    }
+
+    step('canvas, drag, wheel');
+    {
+      const wrap = fresh(Kit.el('div'), 'position: relative; width: 200px; height: 100px'); const cvs = Kit.el('canvas'); cvs.style.cssText = 'position: absolute; inset: 0; width: 100%; height: 100%'; wrap.append(cvs);
+      const draws = [], overs = [];
+      const c = Kit.canvas(cvs, (ctx, w, h, ctl) => draws.push([w, h, typeof ctl.invalidate === 'function']), { overlay: (ctx, w, h) => overs.push([w, h]) });
+      const dpr = window.devicePixelRatio || 1;
+      ok(draws.length === 1 && draws[0][0] === 200 && draws[0][1] === 100 && cvs.width === Math.round(200 * dpr) && cvs.height === Math.round(100 * dpr), `canvas: drawn at once at the device size (${cvs.width} x ${cvs.height})`);
+      ok(overs.length === 1 && c.overlay && c.overlay.previousSibling === cvs && c.overlay.style.pointerEvents === 'none', 'canvas: an overlay on top that lets clicks through');
+      await sleep(200); const d0 = draws.length, o0 = overs.length;              /* (the first ResizeObserver report, if any, has come by now) */
+      c.invalidate(); c.invalidate(); c.invalidate(); await frames(3); ok(draws.length === d0 + 1 && overs.length === o0 + 1, `canvas: invalidate is coalesced into one frame (${draws.length - d0} draws)`);
+      c.invalidateOverlay(); c.invalidateOverlay(); await frames(3); ok(draws.length === d0 + 1 && overs.length === o0 + 2, 'canvas: invalidateOverlay redraws only the overlay');
+      wrap.style.width = '300px'; window.dispatchEvent(new Event('resize')); await frames(4); await sleep(50);       /* (a ResizeObserver needs real frames; the window event is the other way in) */
+      ok(draws[draws.length - 1][0] === 300 && cvs.width === Math.round(300 * dpr), `canvas: it redraws when its box changes (${draws[draws.length - 1][0]})`);
+      ok(approx(c.snap(10.3), Math.round(10.3 * dpr) / dpr, 1e-9), 'canvas: snap puts a line on a device pixel');
+      let cssOk = true; for (const t of ['--bg-0', '--accent', '--cv-row', '--role-lead', '--t-md']) cssOk = cssOk && Kit.css(t) !== ''; ok(cssOk && Kit.css('--accent') === getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() && /^#[0-9a-f]{6}$/i.test(Kit.css('--accent')), 'css: Kit.css reads tokens');
+      const cnt = draws.length; c.destroy(); c.invalidate(); await frames(2); ok(draws.length === cnt && !c.overlay.isConnected, 'canvas: destroy stops it and removes the overlay'); wrap.remove();
+      /* drag */
+      const el = fresh(Kit.el('div'), 'width: 100px; height: 60px'); const ev = [];
+      Kit.drag(el, { threshold: 5, start: (d) => { ev.push(['start', Math.round(d.ox), Math.round(d.oy)]); return { tag: 1 }; }, move: (d) => ev.push(['move', Math.round(d.dx), d.moved, d.state.tag]), end: (d, can) => ev.push(['end', d.moved, can]) });
+      const er = rect(el), ex = er.left + 10, ey = er.top + 10;
+      P('pointerdown', el, ex, ey); P('pointermove', el, ex + 2, ey); P('pointermove', el, ex + 20, ey); P('pointerup', el, ex + 20, ey);
+      ok(JSON.stringify(ev) === '[["start",10,10],["move",20,true,1],["end",true,false]]', `drag: start, a move past the threshold, end (${JSON.stringify(ev)})`);
+      ev.length = 0; P('pointerdown', el, ex, ey, { button: 2 }); ok(ev.length === 0, 'drag: another button is ignored');
+      P('pointerdown', el, ex, ey); P('pointermove', el, ex + 20, ey); K(body, 'Escape'); ok(ev[ev.length - 1][0] === 'end' && ev[ev.length - 1][2] === true, 'drag: Esc cancels');
+      ev.length = 0; P('pointermove', el, ex + 30, ey); P('pointerup', el, ex + 30, ey); ok(ev.length === 0, 'drag: nothing is heard after it ends');
+      const refused = []; Kit.drag(el, { start: () => false, move: () => refused.push(1) }); const before = ev.length; P('pointerdown', el, ex, ey); P('pointermove', el, ex + 20, ey); ok(refused.length === 0, 'drag: start returning false refuses');
+      el.remove();
+      /* wheel */
+      const wv = fresh(Kit.el('div'), 'width: 100px; height: 60px'); const got = [];
+      Kit.wheel(wv, { scroll: (dx, dy, i) => got.push(['scroll', dx, dy]), zoom: (f, i) => got.push(['zoom', Math.round(f * 1000) / 1000, i.pinch]) });
+      const e1 = W(wv, { deltaY: 3, deltaMode: 1 }); W(wv, { deltaY: 100, shiftKey: true }); W(wv, { deltaX: 7, deltaY: 1 }); W(wv, { deltaY: -100, ctrlKey: true }); W(wv, { deltaY: -2.5, ctrlKey: true });
+      ok(JSON.stringify(got) === '[["scroll",0,48],["scroll",100,0],["scroll",7,1],["zoom",1.162,false],["zoom",1.025,true]]' && e1.defaultPrevented, `wheel: lines become pixels, Shift turns it sideways, Ctrl or a pinch zooms (${JSON.stringify(got)})`);
+      const only = fresh(Kit.el('div')); Kit.wheel(only, { scroll: () => {} }); ok(!W(only, { deltaY: 100, ctrlKey: true }).defaultPrevented, 'wheel: Ctrl and wheel is left alone when there is no zoom handler'); wv.remove(); only.remove();
+    }
+
+    step('storage and files');
+    {
+      const name = 'st_' + Date.now();
+      const s = Kit.store(name), s2 = Kit.store(name + '_b');
+      step('storage: set'); await s.set('a', { x: [1, 2, { y: 3 }] }); await s.set('bytes', new Uint8Array([9, 8, 7])); await s2.set('a', 'other');
+      step('storage: get'); const a = await s.get('a'), bytes = await s.get('bytes');
+      ok(a && a.x[2].y === 3 && bytes instanceof Uint8Array && bytes[2] === 7 && (await s2.get('a')) === 'other', `store (${Kit.store.mode}): objects and bytes round-trip, stores are separate`);
+      ok(JSON.stringify((await s.keys()).sort()) === '["a","bytes"]' && (await s.get('missing')) === undefined, 'store: keys and a missing key');
+      await s.del('a'); ok((await s.get('a')) === undefined && (await s.keys()).length === 1, 'store: del'); await s.clear(); await s2.clear(); ok((await s.keys()).length === 0, 'store: clear');
+      ok(Kit.store.mode === 'indexeddb' || Kit.store.mode === 'memory', `store: mode is ${Kit.store.mode}`); note('the store runs on ' + Kit.store.mode);
+      await Kit.store.kv.set('k', 1); ok((await Kit.store.kv.get('k')) === 1, 'store: Kit.store.kv'); await Kit.store.kv.del('k');
+      step('storage: four at once'); const stamp = Date.now(); await Promise.all([1, 2, 3, 4].map((i) => Kit.store(`${name}_c${i}`).set('v', i)));
+      const back = await Promise.all([1, 2, 3, 4].map((i) => Kit.store(`${name}_c${i}`).get('v')));
+      ok(JSON.stringify(back) === '[1,2,3,4]', `store: four new stores asked for at once all work (${JSON.stringify(back)})`); void stamp;
+      Kit.pref.set('st.pref', { a: 1 }); ok(Kit.pref('st.pref', null).a === 1, 'pref: set and get'); ok(localStorage.getItem('cps3studio.st.pref') !== null, 'pref: kept in localStorage under cps3studio.');
+      Kit.pref.del('st.pref'); ok(Kit.pref('st.pref', 'dflt') === 'dflt', 'pref: del');
+      /* drop */
+      const zone = fresh(Kit.el('div', null, 'drop here'), 'height: 40px'); const dropped = [], rej = [], hov = [];
+      const dz = Kit.drop(zone, { accept: '.mid,.json', onDrop: (f) => dropped.push(f.map((x) => x.name)), onReject: (f) => rej.push(f.map((x) => x.name)), onHover: (b) => hov.push(b) });
+      const mk = (names) => { const dt = new DataTransfer(); for (const nm of names) dt.items.add(new File([new Uint8Array([1, 2, 3])], nm)); return dt; };
+      const D = (type, dt) => zone.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: dt }));
+      D('dragenter', mk(['a.mid'])); ok(zone.classList.contains('dropping') && hov[0] === true, 'drop: .dropping while a file is over it');
+      D('dragleave', mk(['a.mid'])); ok(!zone.classList.contains('dropping') && hov[1] === false, 'drop: and not after it leaves');
+      D('dragenter', mk(['a.mid'])); D('drop', mk(['a.MID', 'b.txt', 'c.json'])); ok(JSON.stringify(dropped) === '[["a.MID","c.json"]]' && !zone.classList.contains('dropping'), `drop: only the accepted files (${JSON.stringify(dropped)})`);
+      D('drop', mk(['b.txt'])); ok(JSON.stringify(rej) === '[["b.txt"]]' && dropped.length === 1, 'drop: refused files go to onReject');
+      const textDrag = new DataTransfer(); textDrag.setData('text/plain', 'hi'); D('dragenter', textDrag); ok(!zone.classList.contains('dropping'), 'drop: dragged text is not a file drop');
+      dz.destroy(); zone.remove();
+      step('files: readFile'); const file = new File([new Uint8Array([1, 2, 3])], 'x.bin'); const read = await Kit.readFile(file); ok(read instanceof Uint8Array && read.length === 3 && read[1] === 2, 'readFile: bytes');
+      /* download, pick, save, with the browser's own dialogs stood in for */
+      const realClick = HTMLAnchorElement.prototype.click; let anchor = null; HTMLAnchorElement.prototype.click = function () { anchor = this; };
+      const blob = Kit.download('hello.txt', 'hi there', 'text/plain'); HTMLAnchorElement.prototype.click = realClick;
+      ok(blob.size === 8 && blob.type === 'text/plain' && anchor && anchor.download === 'hello.txt' && anchor.href.startsWith('blob:'), 'download: a blob and a link with the file name');
+      const realInput = HTMLInputElement.prototype.click; let seen = null;
+      HTMLInputElement.prototype.click = function () { seen = this; if (this.type === 'file') { const dt = mk(['p.mid']); this.files = dt.files; this.dispatchEvent(new Event('change')); } };
+      step('files: pickFile'); const picked = await Kit.pickFile('.mid'); ok(picked && picked.name === 'p.mid' && seen.accept === '.mid', 'pickFile: gives the chosen file');
+      const many = await Kit.pickFile('.mid', { multiple: true }); ok(Array.isArray(many) && many.length === 1 && seen.multiple === true, 'pickFile: several');
+      HTMLInputElement.prototype.click = function () { if (this.type === 'file') this.dispatchEvent(new Event('cancel')); };
+      ok((await Kit.pickFile('.mid')) === null, 'pickFile: cancel gives null'); HTMLInputElement.prototype.click = realInput;
+      ok(!document.querySelector('input[type=file]'), 'pickFile: no input is left behind');
+      const written = []; const dir = { getFileHandle: async (nm, o) => ({ createWritable: async () => ({ write: async (b) => written.push([nm, b.length, o.create]), close: async () => {} }) }) };
+      step('files: saveInto'); const names = await Kit.saveInto(dir, [{ name: 'a.txt', bytes: new Uint8Array(3) }, { name: 'b.json', bytes: new Uint8Array(5) }]);
+      ok(JSON.stringify(names) === '["a.txt","b.json"]' && JSON.stringify(written) === '[["a.txt",3,true],["b.json",5,true]]', 'saveInto: writes each file into the folder');
+      let refused = 0; for (const bad of ['../x', 'a/b', 'a\\b', '', '..', '.', 'x:y']) { try { await Kit.saveInto(dir, [{ name: bad, bytes: new Uint8Array(1) }]); } catch (e) { if (e instanceof TypeError) refused++; } }
+      ok(refused === 7 && written.length === 2, `saveInto: names that are not plain file names are refused (${refused} of 7)`);
+      let nodir = false; try { await Kit.saveInto(null, []); } catch (e) { nodir = e instanceof TypeError; } ok(nodir, 'saveInto: without a folder it says so');
+    }
+  } catch (e) {
+    ok(false, 'the self-test stopped: ' + (e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : e));
+  }
+  box.remove();
+  lines.push(`selftest: ${n} checks, ${bad} failures`);
+  out.textContent = lines.join('\n');
+})();
+</script>
+</body>
+</html>

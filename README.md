@@ -2,20 +2,25 @@
 
 A local creative toolkit for **Street Fighter III 3rd Strike on CPS3**. Compose music, edit artwork and colours, inspect and adjust stored move data, then try supported changes in the browser's game preview.
 
-**Music | Art | Moves | Gameplay** share one ROM import and a project workspace. Open the included HTML launcher: there is no account, package installation or frontend build step.
+The 9 November update recognises Infinite 1.07b and makes the first minutes plainer: the Studio
+asks once where your game files are (or finds them itself), and every screen speaks in plain words.
+The 7 November update lined colours up with the community's tools: PalMod colour strings,
+ACT/MUGEN/GIMP palettes, importing palette mods (ROM files, IPS, FBNeo patch folders), FBNeo patch
+export, and the HUD and Judgement faces of every colour. See [updates](CHANGELOG.md).
 
-**Bring your own game files.** The download contains tools, documentation and compatibility metadata. It contains no ROM images, BIOS images, extracted sprites, palette contents, recordings, music sequences from the game or sound samples. The game engine executes the program supplied by you.
+**Music | Art | Moves | Gameplay** share one ROM import and a project workspace. The repository is the application: open its HTML launcher. There is no account, package installation or build step.
+
+**Bring your own game files.** The repository contains tools, documentation and compatibility metadata. It contains no ROM images, BIOS images, extracted sprites, palette contents, recordings, music sequences from the game or sound samples. The game engine executes the program supplied by you.
 
 ## Quick start
 
-1. Extract the entire ZIP to a folder. Keep the folder structure intact.
-2. Open **`Open CPS3 Studio.html`** in a current desktop Chrome or Edge. On Windows you can use **`Open CPS3 Studio.bat`**. The root `index.html` opens the same launcher.
-3. Choose **Music**, **Art**, **Moves** or **Game**.
-4. At the welcome screen, select your own **`sfiii3nr1.zip`** and **`sfiii3.zip`** together. The original target is **Japan 990512 NO CD rev 1**. Supply the complete sets, including the BIOS and graphics members needed by Game and Art. You can also select the folder containing your game.
-5. Let Studio verify and import the files. Switching modules reuses this import in the same browser.
-6. Export your projects regularly. Browser storage is convenient working storage; clearing site data or moving between browsers can remove or separate it.
+1. Get the files: on GitHub choose **Code → Download ZIP** and extract all of it, or clone the repository with Git. Keep the folder structure intact.
+2. On Windows, double-click **`Open CPS3 Studio.bat`**. With Python 3 installed it starts the Studio's small local server, which finds your game by itself and opens the Studio in its own window; without Python it opens the Studio from disk in your browser. On any system you can open **`Open CPS3 Studio.html`** in a current desktop Chrome or Edge (the root `index.html` opens the same launcher).
+3. The first time, the **Your game files** screen asks where your game is. Through the local server it offers **Find them automatically** (Fightcade, the Infinite client, folders you chose before) or **Choose files myself**; opened from disk it asks for the files directly: a folder, your own **`sfiii3nr1.zip`** and **`sfiii3.zip`**, or a drop. The original target is **Japan 990512 NO CD rev 1**; supply the complete sets, including the BIOS and graphics members needed by Game and Art.
+4. The Studio checks the files against the game's program and remembers them, then shows **Music**, **Art**, **Moves** and **Game**. Switching modules reuses the same import.
+5. Export your projects regularly. Browser storage is convenient working storage; clearing site data or moving between browsers can remove or separate it.
 
-The pages can also be served by a local or static web server. Files selected in the welcome screen are read in your browser. The application does not upload them. Browser storage is separate for each origin; a disk launch and an HTTP launch may need separate imports.
+The pages can also be served by a local or static web server. Files you choose on the game files screen are read in your browser. The application does not upload them. Browser storage is separate for each origin; a disk launch and an HTTP launch may need separate imports.
 
 ## What each module does
 
@@ -46,7 +51,8 @@ Art reads the artwork from your imported ROM. The Library includes character ani
 
 - Indexed drawing, layers, selection, undo/redo, onion skin and animation playback.
 - PNG and sprite-sheet import/export with frame and origin information.
-- Character colours, supported extended colours and stage colour variants.
+- Character colours, supported extended colours and stage colour variants, including each colour's HUD and Judgement faces.
+- Colour sharing with PalMod (colour strings, ACT), MUGEN, GIMP and Aseprite palettes, palette mods from ROM files or IPS patches, and FBNeo patch export.
 - Gill's timed palette phases, with explicit handling of shared colour sources.
 - Discovery links between artwork, palettes, animations and known scene tables.
 - More palette context for title/ending art, the bonus car and Poison.
@@ -77,6 +83,13 @@ Game preview is a development tool. Its counters describe the emulator, and its 
 
 ## One project across the tools
 
+Registered **local character projects** now open directly inside Art. Studio resumes
+the character, animation and frame; its project workspace includes direct drawing
+saves, sequence editing, shared-frame copies, quality marks, reference artwork and
+project backups. The local provider supplies the character's existing files and
+build rules. Character projects and their private assets are not bundled. See
+[Character projects](art_editor/docs/CHARACTER_PROJECTS.md) for setup and limits.
+
 The shared workspace keeps source identity, documents, history, versions and staged build layers together. Work is separated by game source and, where applicable, game mode. Exported shared projects use **`.cps3project`**; existing Music and Art formats remain supported in their own modules.
 
 Stage changes from each editor's delivery/build controls before creating a combined build. The Builder checks the selected source, original-byte preconditions, dependencies, storage claims and overlapping writes. Conflicting writes are refused. Saving a draft does not by itself make every draft operation deliverable.
@@ -88,10 +101,11 @@ Use exported project files for backups. Projects, patched images and exports can
 | Source | Music | Art / Moves / Game |
 | --- | --- | --- |
 | Original Japan 990512 NO CD rev 1 (`sfiii3nr1`) | Available | Available, within each operation's stated limits |
-| Recognised Infinite 1.033 | Not enabled by the Music module | Available; operation-specific checks still apply |
-| Recognised Infinite 1.04 | Not enabled by the Music module | Available; operation-specific checks still apply |
+| Infinite 1.07b, the current release | Music uses the original game's sounds | Available. Infinite's extra colours, stage variants and Gill's timed colours are not listed on 1.07b yet: its code for them differs from the versions the Studio has verified, and Palettes says so |
 
-Recognition uses image hashes, not archive names alone. Infinite modes include Super SF3, 3rd Strike and 3v3. Other builds, including later updates, are not automatically compatible. Importing a recognised source does not grant permission for every possible edit on that source.
+A game is recognised by the SHA-256 of its decrypted program and of its graphics and sound data, never by file names. The Studio knows every released Infinite set by these hashes; an older one is named, and the Studio asks you to let the Infinite client update it. Infinite modes are Super SF3, 3rd Strike and 3v3; the game starts in Super SF3 and the Game menu in the top bar changes the mode. Other builds are not automatically compatible. A recognised source does not grant permission for every possible edit on it.
+
+**Finding the game.** Started through its local launcher (`cps3_studio/launch.py`), the Studio looks for the game itself: Fightcade's FBNeo ROMs folder (found through Fightcade's `fcade://` link or its usual install places), the Infinite client's prepared ROMs and mode settings, and any folder you chose before. The first time it starts, the Your game files screen offers Find them automatically (which lists what those places hold, best first) or Choose files myself (a folder, the two zip files or a drop); the choice is checked against the game's program and remembered in the Studio's settings file, so no page asks again. Game files… in the Game menu reopens the screen. Opened straight from disk, the same screen asks for the files once and the browser keeps them.
 
 ## Command line
 
@@ -161,9 +175,9 @@ docs/                  cross-module workflows
 
 - This is an evolving toolkit, not a finished character or stage construction suite. General assist authoring, character assembly, arbitrary sprite growth and unrestricted stage/screen editing are not completed features of this release.
 - Art writes remain limited by ownership, layout, source and capacity checks. A browsable or drawable asset is not necessarily installable.
-- Music uses 16 monophonic voices; chords consume several voices, and game effects share voices 13?16. New sample storage, chip filters and chip reverb are not supplied.
+- Music uses 16 monophonic voices; chords consume several voices, and game effects share voices 13-16. New sample storage, chip filters and chip reverb are not supplied.
 - If import fails, check the exact revision and supply both complete archives. Renaming a different ROM set does not make it compatible.
-- If a mode asks for ROMs again, check the selected source and browser origin. Keep all extracted files together and use the same browser for continued work.
+- If a module asks for your game files again, check the game chosen under Game files… in the Game menu and the browser origin. Keep all files together and use the same browser for continued work.
 - If an export is refused, read the source, conflict or capacity message. Export the editable project while resolving it.
 - If audio is silent, interact with the page, check the module's sound control and browser permissions. Automated checks intentionally mute browser output.
 

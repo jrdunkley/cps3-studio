@@ -1,0 +1,20 @@
+/* Focused naming/cache/identity checks. Supply a private pack made by cli/studio.js rom import. */
+'use strict';
+const assert = require('assert'), path = require('path');
+require(path.resolve(process.argv[2] || path.join(__dirname, '../data/pack.js')));
+const { Engine } = require('../js/engine.js'), Data = require('../js/gamedata.js'), Catalog = require('../js/catalog.js');
+const e = new Engine(globalThis.SF3_PACK), data = Data.load(e, SF3_PACK.names), c = Catalog.build(e, data);
+let checks = 0;
+const ok = (v, why) => { assert(v, why); checks++; };
+ok(c.version === 2 && Catalog.VERSION === 2, 'old cached labels are invalidated');
+ok(Object.values(c.programs).filter(p => p.bank === 0).length === 59, 'all music voices remain');
+ok(c.programs['0:57'].name === 'Sax-like reed voice' && c.programs['0:57'].aliases.includes('Deep pad'), 'corrected listening identity and old search alias');
+ok(c.programs['0:57'].role === 'pad', 'arrangement role remains independent of timbre');
+ok(Catalog.suggest('lead', 65).program === 57, 'MIDI sax recommendation still uses the same CPS3 voice');
+ok(Catalog.nameOf(c, 0, 57, { '0:57': 'My sax' }) === 'My sax', 'user names retain priority');
+ok(Catalog.nameOf(c, 0, 57, {}) === 'Sax-like reed voice', 'default is corrected');
+ok(Object.keys(c.programs).every(key => key === `${c.programs[key].bank}:${c.programs[key].program}`), 'bank/program identities stay exact');
+ok(Object.values(c.programs).every(p => p.name && p.description && ['listening', 'description'].includes(p.nameKind)), 'all labels state their basis');
+const zones = Object.values(c.programs).reduce((n, p) => n + p.zones.length, 0);
+ok(zones > 600, 'instrument zones remain available');
+console.log(JSON.stringify({ passed: true, checks, musicPrograms: 59, programs: Object.keys(c.programs).length, zones }));

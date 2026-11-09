@@ -1,0 +1,32 @@
+﻿.art-deliver-host { min-height: 0; overflow: hidden; }
+.art-deliver-grid { height: 100%; display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 0; overflow: hidden; }
+.art-deliver-column { display: flex; flex-direction: column; min-width: 0; overflow: auto; }
+.art-deliver-card { flex: none; border-radius: 0; }
+.art-deliver-main { overflow: auto; height: 100%; }
+.art-deliver-card > header { height: 32px; }
+.art-deliver-card > .group { padding: var(--s3); gap: var(--s2); }
+.art-deliver-column .art-deliver-card > .group { padding: var(--s2); }
+.art-deliver-main > .group { padding: var(--s4); gap: var(--s4); }
+.art-deliver-card .hbox { flex-wrap: wrap; }
+.art-deliver-card .lab { max-width: 440px; }
+.art-deliver-card .field { width: 100px; }
+.art-needs,.art-findings,.art-files { display: flex; flex-direction: column; gap: var(--s2); }
+.art-change-group { display: flex; flex-direction: column; gap: var(--s2); }
+.art-change { display: grid; grid-template-columns: 56px minmax(0,1fr) auto; align-items: center; gap: var(--s3); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.art-change-body { display: flex; flex-direction: column; gap: var(--s1); }
+.art-deliver-thumb { width: 48px; height: 48px; object-fit: contain; image-rendering: pixelated; background: var(--bg-3); }
+.art-room { display: flex; align-items: center; gap: var(--s2); }
+.art-room .bar { width: 160px; }
+.art-finding { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2); padding: var(--s2) 0; border-bottom: 1px solid var(--line); }
+.art-finding > .grow { flex-basis: 240px; }
+.art-file { display: flex; justify-content: space-between; gap: var(--s2); }
+.art-file .num { font-size: var(--t-xs); }
+.art-proof { display: grid; gap: var(--s1); padding-top: var(--s3); border-top: 1px solid var(--line); }
+.art-deliver-card summary { cursor: pointer; color: var(--ink-2); }
+.art-warning { color: var(--warn); }
+.art-sprite-facts { padding: var(--s3); display: flex; flex-direction: column; gap: var(--s2); }
+.art-bench-status { min-width: 0; }
+#selftest { position: fixed; inset: auto 0 0 auto; max-height: 120px; overflow: auto; background: var(--bg-1); font: var(--t-xs) var(--mono); }
+.art-deliver-empty { display:grid; gap:8px; max-width:520px; }
+.art-deliver-empty p, .art-deliver-empty ul { margin:0; }
+.art-deliver-empty ul { padding-left:20px; display:grid; gap:4px; }

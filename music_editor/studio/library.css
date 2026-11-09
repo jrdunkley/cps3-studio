@@ -1,0 +1,10 @@
+.library-workspace { display: grid; grid-template-columns: 220px minmax(0, 1fr); height: 100%; min-height: 0; }
+.library-nav { display: flex; flex-direction: column; gap: 8px; padding: 16px 12px; border-right: 1px solid var(--line); background: var(--bg-1); }
+.library-nav .field { width: 100%; }
+.library-nav .btn { justify-content: flex-start; }
+.library-list { min-width: 0; overflow: auto; }
+.library-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; min-height: 64px; padding: 12px 20px; border-bottom: 1px solid var(--line); }
+.library-title { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.library-title b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.library-listing { max-height: 65vh; overflow: auto; font-family: var(--mono); }
+.library-versions { display: flex; flex-direction: column; gap: 4px; max-height: 50vh; overflow: auto; }

@@ -1,0 +1,30 @@
+/* Asset rows reuse the Library's kit surfaces and controls. */
+.finding-row { position:absolute; left:0; right:0; width:100%; height:88px; justify-content:flex-start; text-align:left; gap:16px; padding:12px 16px; border:0; border-bottom:1px solid var(--line); border-radius:0; }
+.finding-row canvas { width:64px; height:64px; flex:none; image-rendering:pixelated; }
+.finding-label { display:flex; flex-direction:column; gap:4px; min-width:0; white-space:normal; }
+.finding-label b { overflow-wrap:anywhere; }
+.finding-label .num { text-align:left; }
+.library-detail-head h2 { white-space:normal; }
+.library-facts p { overflow-wrap:anywhere; }
+.art-preview header [data-backdrop] { margin-left:4px; }
+.art-library.findings-account-grid { grid-template-rows:auto minmax(0,1fr); }
+.finding-account { grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:4px; padding:8px 12px; border-bottom:1px solid var(--line); background:var(--bg-1); }
+.finding-account .btn { font-family:var(--mono); font-size:var(--t-xs); }
+.finding-load { display:grid; gap:8px; padding:12px 0; border-top:1px solid var(--line); }
+.finding-load p { margin:0; }
+
+.finding-load .art-facts { max-width:480px; }
+.finding-load .bar > i { background:var(--ink-3); }
+.art-deliver-main > .finding-load { padding:16px; }
+.library-nav > .btn:first-child { height:auto; min-height:var(--row); white-space:normal; }
+.app[data-art-browse-only="true"] .transport,
+.app[data-art-browse-only="true"] .readout,
+.app[data-art-browse-only="true"] .art-colour-control { display:none; }
+.finding-load .art-facts { grid-template-columns:max-content max-content; column-gap:24px; justify-content:start; }
+.finding-row.finding-tile { flex-direction:column; justify-content:center; align-items:center; height:128px; gap:6px; padding:8px; text-align:center; border-right:1px solid var(--line); }
+.finding-row.finding-tile .finding-label { display:grid; gap:2px; justify-items:center; max-width:100%; }
+.finding-row.finding-tile .finding-label b { max-width:112px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:var(--t-sm); }
+.finding-account { display:flex; flex-wrap:wrap; gap:4px 20px; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--bg-1); }
+.finding-account > button { background:none; border:0; padding:0; height:auto; min-height:0; color:var(--ink-3); font-size:var(--t-sm); font-family:var(--mono); }
+.finding-account > button:hover { color:var(--ink); }
+.finding-note { margin:0; padding:8px 16px; color:var(--ink-3); font-size:var(--t-sm); border-bottom:1px solid var(--line); }

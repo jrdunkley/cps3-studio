@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CPS3 Studio &middot; Art &middot; Everything</title>
+<link rel="stylesheet" href="../studio_kit/kit.css"><link rel="stylesheet" href="studio/everything.css">
+<style>#workspace{position:relative;min-height:0}.app{grid-template-rows:48px minmax(0,1fr) 24px}.topbar .seg a{text-decoration:none}</style></head><body><div class="app" id="studio-app">
+<div class="topbar"><div class="brand"><span class="mark"></span><span>CPS3 Studio <small>Art</small></span></div><span class="sep"></span><b>Everything in the ROM</b><span class="grow"></span>
+<nav class="seg" aria-label="Studio mode"><a class="btn" href="../music_editor/index.html" data-tip="Music|Open Music.">Music</a><a class="btn" href="index.html" data-tip="Art|Back to the Art workspaces.">Art</a><a class="btn on" href="everything.html" aria-current="page">Everything</a></nav></div>
+<main id="workspace"><div class="empty"><b>Reading every sprite&hellip;</b><p>This takes a few seconds the first time.</p></div></main>
+<footer class="statusbar"><span class="grow hintline" data-status>Preparing&hellip;</span><span>sfiii3nr1 &middot; 384 &times; 224</span></footer></div>
+<script src="../studio_kit/icons.js"></script><script src="../studio_kit/icons_art.js"></script>
+<script src="../studio_kit/kit.js"></script>
+<script src="../studio_kit/core/zip.js"></script>
+<script src="../studio_kit/core/cps3rom.js"></script>
+<script src="../studio_kit/shell.js"></script>
+<script src="js/codec6.js"></script><script src="js/cel.js"></script><script src="js/anim.js"></script><script src="js/palette.js"></script><script src="js/names.js"></script><script src="js/cutcontent.js"></script><script src="js/stage.js"></script><script src="js/png.js"></script>
+<script src="js/truecolours.js"></script><script src="studio/everything.js"></script>
+<script>
+(async function () {
+  const root = document.getElementById('workspace');
+  function boot(rom) {
+    Kit.status('Reading every sprite…');
+    setTimeout(() => { try { window.everything = ArtEverything.mount(root, { rom }); Kit.status('Every stored sprite is here. Click one to see it; arrows move; type a number to jump.'); } catch (e) { Kit.status(e.message); root.replaceChildren(Object.assign(document.createElement('div'), { className: 'empty', textContent: e.message })); } }, 30);
+  }
+  CPS3Studio.active = { id: 'art_editor' };
+  try { const rom = await CPS3Studio.loadRom({ graphics: true }); if (rom) boot(rom); else CPS3Studio.welcome(root, boot); }
+  catch (e) { Kit.status(e.message); CPS3Studio.welcome(root, boot); }
+})();
+</script></body></html>

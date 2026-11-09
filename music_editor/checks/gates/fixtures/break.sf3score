@@ -1,0 +1,15 @@
+# A kit-only break with hits off the grid: raw keys, @ for notes off the running cursor, overlapping hits.
+cps3 score 1
+title: Break Test
+tempo: 140.37
+bars: 4
+loop: off
+markers: 0
+autotune: off
+
+part Break program 1 volume 90 expression 88 pan 127 role drums
+  device double offset=2
+  bar 1 | #41:8 #42 #46!52 #44!60 #45 #46!52 #47!60 #48 |
+  bar 2 | @3 #38:=7!120 @50 #38:=5 @101 #42:=9!64 @190 #46:=2!90 |
+  bar 3 | @0 #36:=10!110 @0 #49:=40!80 @20 #42:16!70 @191 #46:=30 |
+  bar 4 | r:2 #38:4!127 #38 |

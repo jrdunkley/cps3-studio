@@ -1,0 +1,5 @@
+cps3 score 1
+title: Not a length
+bars: 2
+part Pad program 46 volume 64 expression 64 pan 108
+  bar 1 | C4:5 E4 G4 | |

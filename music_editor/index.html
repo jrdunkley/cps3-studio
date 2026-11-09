@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CPS3 Studio · Music</title>
+<link rel="stylesheet" href="../studio_kit/kit.css">
+<link rel="stylesheet" href="studio/music.css"><link rel="stylesheet" href="studio/compose.css"><link rel="stylesheet" href="studio/roll.css"><link rel="stylesheet" href="studio/mix.css">
+<link rel="stylesheet" href="studio/sounds.css"><link rel="stylesheet" href="studio/designer.css"><link rel="stylesheet" href="studio/library.css"><link rel="stylesheet" href="studio/deliver.css">
+</head><body>
+<div class="app" id="studio-app">
+  <div class="topbar">
+    <div class="brand"><span class="mark"></span><span class="wide-only">CPS3 Studio <small>Music</small></span></div><span class="sep"></span>
+    <input id="song-name" class="field bare song" aria-label="Song name" data-tip="Song name|Give this song a name." value="Untitled song"><span class="tag" id="saved" hidden data-tip="Saved|Your song is saved in this browser as you work. Save project (Ctrl S) also downloads an editable file.">Saved</span><span class="grow"></span>
+    <div class="transport"><button class="btn icon" data-action="music.rewind"></button><button class="btn icon play" data-action="music.play"></button><button class="btn icon" data-action="music.stop"></button><button class="btn icon" data-action="music.cycle" id="cycle"></button></div>
+    <div class="readout"><small>Bar</small><b id="position">1.1.0</b><small>Tempo</small><input id="tempo" class="field bare num" aria-label="Tempo" data-tip="Tempo|Set beats per minute while the song plays." type="number" min="30" max="300" step="0.1" value="120"><small class="wide-only">Key</small><button class="btn ghost num wide-only" id="song-key" data-tip="Key|Choose the song’s key and scale.">—</button></div>
+    <div class="voices" id="voices" data-tip="16 voices|The game’s sound effects borrow voices 13 to 16 in a fight."></div><span class="grow"></span>
+    <div class="seg"><button class="on" id="mono" data-tip="Fightcade|Mono: what every player hears.">Fightcade</button><button id="stereo" data-tip="Stereo|What the pans do on a board set to stereo.">Stereo</button></div>
+    <input id="master" type="range" class="slider wide-only" min="0" max="100" value="78" aria-label="Master volume" data-tip="Master volume|Change listening volume without changing the song.">
+    <button class="btn ghost" data-action="palette.open"><svg class="ic"><use href="#i-search"/></svg><kbd class="wide-only">Ctrl K</kbd></button><button class="btn icon ghost" data-action="studio.settings"></button>
+  </div>
+  <div class="tabs" id="workspaces"><div class="right"><button class="btn ghost" id="game-check" data-tip="Game Check|Check how this song fits the game.">Game Check</button><span class="budget">Tracks <b class="num" id="track-count">0</b>/16</span><span class="budget">Size <b class="num" id="song-size">0 B</b></span></div></div>
+  <main id="workspace"></main>
+  <footer class="statusbar"><span class="hintline grow" id="status" data-status>Preparing the sounds…</span><span id="driver-label">Driver sfiii3nr1 · mono</span></footer>
+</div>
+<script src="data/pack.js"></script><script src="data/library.js"></script>
+<script src="../studio_kit/icons.js"></script><script src="../studio_kit/kit.js"></script><script src="../studio_kit/panels.js"></script><script src="../studio_kit/core/zip.js"></script><script src="../studio_kit/core/cps3rom.js"></script>
+<script src="js/sh2.js"></script><script src="js/engine.js"></script><script src="js/seq.js"></script><script src="js/gamedata.js"></script><script src="js/midi.js"></script><script src="js/project.js"></script>
+<script src="js/bank.js"></script><script src="js/compile.js"></script><script src="js/decomp.js"></script><script src="js/catalog.js"></script><script src="js/analyze.js"></script><script src="js/score.js"></script><script src="js/audio.js"></script><script src="js/packbuild.js"></script>
+<script src="../studio_kit/core/sources.js"></script><script src="../studio_kit/core/builder.js"></script><script src="../studio_kit/core/project.js"></script><script src="../studio_kit/project_service.js"></script><script src="../studio_kit/shell.js"></script><script src="studio/selftest.js"></script><script src="studio/state.js"></script><script src="studio/demo.js"></script><script src="studio/transport.js"></script>
+<script src="studio/compose.js"></script><script src="studio/automation.js"></script><script src="studio/roll.js"></script><script src="studio/inspector.js"></script><script src="studio/mix.js"></script><script src="studio/sounds.js"></script><script src="studio/designer.js"></script><script src="studio/library.js"></script><script src="studio/deliver.js"></script><script src="studio/help.js"></script><script src="studio/bench.js"></script><script src="studio/main.js"></script>
+</body></html>

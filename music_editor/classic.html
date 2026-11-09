@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>3rd Strike Music Editor</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header>
+  <h1>3rd Strike Music Editor</h1>
+  <div class="transport">
+    <button id="stop" title="Stop all sound (Esc)">Stop</button>
+    <label>Volume <input id="master" type="range" min="0" max="100" value="80"></label>
+    <span id="lights" title="The chip's 16 voices"></span>
+    <span id="now"></span>
+  </div>
+  <nav>
+    <button data-tab="game" class="on">Game music</button>
+    <button data-tab="sounds">Sounds</button>
+    <button data-tab="mine">My song</button>
+    <button data-tab="help">Help</button>
+  </nav>
+</header>
+<div id="status" class="status"></div>
+
+<main>
+<section id="tab-game">
+  <div class="cols">
+    <div class="list" id="songs"></div>
+    <div class="detail">
+      <h2 id="song-title">Pick a piece of music</h2>
+      <p id="song-facts" class="facts"></p>
+      <div class="row">
+        <button id="song-play" class="primary">Play</button>
+        <label>Start with <select id="song-fade"><option value="0">no fade</option><option value="546">the game's 1 s fade-in</option></select></label>
+        <button id="song-midi">Export MIDI</button>
+        <button id="song-copy" title="Open this music as an editable song in the My song tab">Copy to My song</button>
+        <button id="song-wav">Save WAV (one loop)</button>
+      </div>
+      <fieldset>
+        <legend>Try the driver's own controls</legend>
+        <div class="row">
+          <label>Pitch <select id="song-pitch"></select></label>
+          <label>Speed <input id="song-speed" type="range" min="-30" max="30" value="0"> <span id="song-speed-text"></span></label>
+          <label>Music level <input id="song-atten" type="range" min="0" max="127" value="0" class="rev"></label>
+        </div>
+        <div class="row">
+          <button id="lift">Lift the key by a semitone</button>
+          <label>on the <select id="lift-when"><option value="phrase">next phrase line</option><option value="four">next 4-bar line</option><option value="now">spot (now)</option></select></label>
+          <label>to <select id="lift-what"><option value="tracks">the ticked tracks only</option><option value="all">everything, and speed up to match</option></select></label>
+          <button id="lift-reset">Back to the original key</button>
+          <span id="lift-state" class="note"></span>
+        </div>
+        <p class="note">"Ticked tracks only" changes the notes those tracks play next, as a band changing key would: tick the melodic tracks, leave drum kits unticked (a drum kit plays a different drum for each key). "Everything" uses the driver's music pitch control, which also raises drums and shortens sampled phrases, so the tempo rises by the same ratio to keep them in time.</p>
+      </fieldset>
+      <table id="song-tracks" class="grid"></table>
+    </div>
+  </div>
+</section>
+
+<section id="tab-sounds" hidden>
+  <div class="cols">
+    <div class="list">
+      <div class="row"><label>Bank <select id="bank"></select></label></div>
+      <div id="programs"></div>
+    </div>
+    <div class="detail">
+      <h2 id="inst-title">Pick an instrument</h2>
+      <p id="inst-facts" class="facts"></p>
+      <div class="row">
+        <label>Your name for it <input id="inst-name" type="text" size="28" placeholder="for example: slap bass"></label>
+        <label>Loudness <input id="inst-vel" type="range" min="10" max="127" value="110"></label>
+        <label>Note length <select id="inst-len"><option value="24">half a beat</option><option value="96" selected>two beats</option><option value="384">two bars</option></select></label>
+      </div>
+      <div id="keys"></div>
+      <table id="regions" class="grid"></table>
+      <fieldset>
+        <legend>Sound effects and voices</legend>
+        <div class="row">
+          <label>Request number <input id="sfx-code" type="number" min="0" max="3250" value="256"></label>
+          <button id="sfx-prev">&lt;</button><button id="sfx-play">Play</button><button id="sfx-next">&gt;</button>
+          <span id="sfx-info" class="note"></span>
+        </div>
+      </fieldset>
+    </div>
+  </div>
+</section>
+
+<section id="tab-mine" hidden>
+  <div class="row">
+    <label class="file">Import a MIDI file <input id="midi-file" type="file" accept=".mid,.midi"></label>
+    <label class="file">Open a project <input id="project-file" type="file" accept=".json"></label>
+    <span id="library-row" hidden><label>Arrangements <select id="library"></select></label> <button id="library-open">Open</button></span>
+    <button id="project-save">Save project</button>
+    <button id="project-close" title="Clear the song so the next MIDI file starts from nothing">Close song</button>
+    <span class="note">You can also drop a .mid file anywhere on this page.</span>
+  </div>
+  <div id="mine-empty" class="empty">Nothing here yet. Import a MIDI file, or use "Copy to My song" on a piece of game music.</div>
+  <div id="mine" hidden>
+    <div class="row">
+      <label>Name <input id="p-name" type="text" size="24"></label>
+      <label>Tempo <input id="p-bpm" type="number" min="30" max="300" step="0.1"> BPM</label>
+      <label><input id="p-loop" type="checkbox"> Loop from bar <input id="p-loop-start" type="number" min="1" value="1"> to the end of bar <input id="p-loop-end" type="number" min="1"></label>
+      <label>Phrase markers every <select id="p-markers"><option value="2">2 bars</option><option value="4">4 bars</option><option value="0">none</option></select></label>
+    </div>
+    <div class="row">
+      <button id="p-play" class="primary" title="Plays from the bar on the position slider">Play in the game's driver</button>
+      <span class="seek">
+        <button id="p-rewind" title="Back to the start">|&lt;</button>
+        <button id="p-back" title="Back 4 bars">&lt;&lt; 4</button>
+        <input id="p-pos" type="range" min="1" max="1" value="1" title="Where Play starts; drag while playing to jump">
+        <button id="p-fwd" title="On 4 bars">4 &gt;&gt;</button>
+        <span class="note">bar <span id="p-pos-n">1</span></span>
+      </span>
+      <button id="p-export">Export for the game</button>
+      <button id="p-wav">Save WAV</button>
+      <button id="part-add">Add a part</button>
+      <span id="p-summary" class="note"></span>
+    </div>
+    <table id="parts" class="grid"></table>
+    <div id="p-report" class="report"></div>
+  </div>
+</section>
+
+<section id="tab-help" hidden>
+  <div class="help">
+    <h2>What this is</h2>
+    <p>This page plays and builds music for Street Fighter III 3rd Strike using the game's own music driver, run from your ROM. Nothing is imitated: the sound you hear is the driver's output through a model of the arcade board's sample chip.</p>
+    <h2>The three tabs</h2>
+    <p><b>Game music</b> plays the 49 pieces in the ROM. Each track can be muted or soloed. You can try the driver's pitch and speed controls, and the key lift, to hear what the game could do with them.</p>
+    <p><b>Sounds</b> lists the instruments. Bank 0 holds the music instruments; a drum kit has a different sound on each key, a pitched instrument plays across the keyboard. Give instruments your own names; the names are kept in this browser and saved inside your projects.</p>
+    <p><b>My song</b> turns a MIDI file into game music. Give each part an instrument, set its level and position, choose the loop, press Play. "Export for the game" saves a song file that a ROM build can install (docs/ROM_GUIDE.md).</p>
+    <p>Play starts at the bar on the position slider: |&lt; goes back to the start, &lt;&lt; 4 and 4 &gt;&gt; skip four bars, and dragging the slider while it plays jumps there. The driver is run silently up to that bar, so it sounds exactly as if it had played through. While it plays, volume, left/right, expression, transpose, mute and tempo change at once; other changes jump back to the same bar. The Level bars show what each part (or, under Game music, each track) is playing as you hear it. "Arrangements" opens the approved songs and the ones made by style\arrange3s.js.</p>
+    <h2>What the game allows</h2>
+    <ul>
+      <li>16 tracks, one note at a time on each. A part that plays chords needs one track per note of the chord: set its "Voices".</li>
+      <li>Tracks 13 to 16 are shared with the sound effects during a fight, so hits and voices cut into them. Put your most important parts first.</li>
+      <li>Only the sounds already in the game. They are 8-bit samples, so everything you write will sound like 3rd Strike.</li>
+      <li>48 ticks to the beat. Notes are rounded to that grid when a MIDI file is imported.</li>
+      <li>Phrase markers tell the game where a musical phrase ends, so it can change music or lift the key on the line.</li>
+    </ul>
+    <h2>Keep it private</h2>
+    <p>The data folder next to this page is made from your ROM. Do not share it. Song files you export contain only your own notes.</p>
+  </div>
+</section>
+</main>
+
+<script src="data/pack.js"></script>
+<script src="data/library.js"></script>
+<script src="js/sh2.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/seq.js"></script>
+<script src="js/gamedata.js"></script>
+<script src="js/midi.js"></script>
+<script src="js/project.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

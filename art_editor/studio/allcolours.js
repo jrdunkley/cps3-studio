@@ -1,0 +1,3 @@
+(function(g){'use strict';const A=g.ArtStudio,el=Kit.el;
+ A.allColours={mount(host,id){const root=el('section.allcolours',{'aria-label':'Every colour'});host.append(root);const render=()=>{root.replaceChildren();if(!A.hasPalettes){root.append(el('p.hint',null,ArtLimits.reason('palette.character')));return;}for(const row of A.colourRows()){const cv=el('canvas',{width:120,height:112}),figure=el('figure',{'data-tip':'Every colour|This sprite in '+row.name+'.'},cv,el('figcaption',null,row.name));root.append(figure);A.drawSprite(cv,A.state.image(id),{width:120,height:112,arcade:A.arcade,slot:row.colour});}};render();const off=A.state.on('project',render);return{render,destroy(){off();root.remove();}};}};
+})(window);

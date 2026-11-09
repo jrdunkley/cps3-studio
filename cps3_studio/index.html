@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CPS3 Studio</title><link rel="stylesheet" href="../studio_kit/kit.css">
+<style>
+  body { min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; background: var(--bg-0); color: var(--ink); }
+  .launch { width: min(880px, calc(100vw - 32px)); padding: 32px 0; }
+  .launch h1 { margin: 0; font-size: 28px; letter-spacing: .01em; }
+  .launch h1 b { color: var(--accent); }
+  .launch .lede { margin: 8px 0 24px; color: var(--ink-2); font-size: var(--t-lg); line-height: 1.5; max-width: 62ch; }
+  #modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+  #modules a { display: flex; flex-direction: column; gap: 6px; padding: 16px; min-height: 112px; border: 1px solid var(--line-2); border-radius: var(--r2); background: var(--bg-1); color: var(--ink); text-decoration: none; }
+  #modules a:hover, #modules a:focus-visible { border-color: var(--accent); background: var(--bg-2); outline: none; }
+  #modules a strong { font-size: var(--t-xl); }
+  #modules a span { color: var(--ink-2); font-size: var(--t-md); line-height: 1.45; }
+  .launch .foot { margin-top: 20px; color: var(--ink-3); font-size: var(--t-sm); line-height: 1.5; }
+  .launch .foot.game { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .launch .foot.game b { color: var(--ink-2); font-weight: 600; }
+  .launch .foot.game .where { overflow-wrap: anywhere; }
+  .launch .gamefiles { width: 100%; margin: 20px 0 0; padding: 0; }
+</style></head>
+<body><main class="launch"><h1>CPS3 <b>Studio</b></h1><p class="lede">Compose music, draw sprites, recolour characters and stages, and adjust moves for Street Fighter III 3rd Strike, then try your changes in the game.</p>
+<nav id="modules" aria-label="Studio modules">
+<a href="../music_editor/index.html" data-module="music_editor"><strong>Music</strong><span>Piano roll, MIDI, mixing and instruments on the game’s own sound driver.</span></a>
+<a href="../art_editor/index.html" data-module="art_editor"><strong>Art</strong><span>Sprites, animations and colours, with PalMod and FBNeo patch sharing.</span></a>
+<a href="../move_editor/index.html" data-module="move_editor"><strong>Moves</strong><span>Timelines, attack data and collision boxes, tested against an opponent.</span></a>
+<a href="../game_editor/index.html" data-module="game_editor"><strong>Game</strong><span>Play, pause, step and compare the game with your changes.</span></a>
+</nav>
+<p class="foot">Bring your own ROM: Japan 990512 NO CD rev 1 (sfiii3nr1.zip with sfiii3.zip). Your files and work stay on this computer.</p></main>
+<script>
+/* A packaged build lists its chosen modules in this page. */
+window.CPS3_MODULES = [{ id: 'music_editor', title: 'Music', href: '../music_editor/index.html' }, { id: 'art_editor', title: 'Art', href: '../art_editor/index.html' }, { id: 'move_editor', title: 'Moves', href: '../move_editor/index.html' }, { id: 'game_editor', title: 'Game', href: '../game_editor/index.html' }];
+</script><script src="../studio_kit/icons.js"></script><script src="../studio_kit/kit.js"></script><script src="../studio_kit/core/zip.js"></script><script src="../studio_kit/core/cps3rom.js"></script><script src="../studio_kit/core/sources.js"></script><script src="../studio_kit/shell.js"></script>
+<script src="../studio_kit/character_projects.js"></script><script>
+/* The first run of the local Studio asks for the game files here (Find them automatically / Choose files myself),
+   before any module; later visits show which game the Studio uses, with Change. Opened from disk, each module asks. */
+(async () => {
+  const S = window.CPS3Studio, K = window.Kit, main = document.querySelector('.launch'), title = main.querySelector('h1'), home = [...main.children].filter(n => n !== title);
+  const foot = main.querySelector('.foot'), plain = foot.cloneNode(true);
+  async function describe() {
+    const v = await S.computer(), c = v && v.confirmed, reg = S.sources();
+    if (!c) return null;
+    const s = reg[c.source], set = v.sets && v.sets.find(x => x.id === c.set);
+    const from = c.kind === 'browser' ? 'files you chose' : c.kind === 'fightcade' ? 'Fightcade' : c.kind === 'infinite' ? 'the Infinite client' : 'a folder you chose';
+    return { title: s ? s.title : c.source, from, where: c.kind === 'browser' ? '' : (set ? set.client || set.folder : c.folder) || '', missing: c.kind !== 'browser' && !set };
+  }
+  async function drawFoot() {
+    if (!S.served()) { foot.replaceWith(plain); return; }
+    await S.confirmKnown(); const d = await describe(); if (!d) return;
+    const line = K.el('p.foot.game', null, K.el('span', null, 'Game: ', K.el('b', null, d.title), ', from ' + d.from), d.where ? K.el('span.where', null, d.where) : '',
+      d.missing ? K.el('span', { style: 'color: var(--warn)' }, 'These files are no longer there.') : '',
+      K.el('button.btn.ghost', { type: 'button', 'data-tip': 'Game files|Choose which game files the Studio uses.', onclick: () => S.changeLocation() }, 'Change…'));
+    main.querySelector('.foot').replaceWith(line);
+  }
+  if (await S.firstRun()) {
+    const host = K.el('div'); home.forEach(n => n.remove()); title.after(host);
+    S.gameFiles(host, { ready: async () => { host.replaceWith(...home); await drawFoot(); } });
+  } else await drawFoot();
+  CPS3CharacterProjects.launcher();
+})();
+</script></body></html>

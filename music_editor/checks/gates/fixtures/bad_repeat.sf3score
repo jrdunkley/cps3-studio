@@ -1,0 +1,5 @@
+cps3 score 1
+title: Nothing to repeat
+bars: 2
+part Break program 1 volume 90 expression 88 pan 127 role drums
+  bar 1 | % | #38:4 #38 #38 #38 |

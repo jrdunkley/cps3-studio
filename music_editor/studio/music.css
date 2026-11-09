@@ -1,0 +1,56 @@
+/* Music Studio: layout shared by every workspace (owner: package B2). Layout only: every colour, size and
+ * control comes from ../../studio_kit/kit.css. Each workspace keeps its own layout in its own file, so
+ * packages never edit the same stylesheet: compose.css (B3), roll.css (B4), mix.css (B5), sounds.css (B6),
+ * designer.css (B7), library.css and deliver.css (B8). */
+
+/* ---- the top bar's song name ----------------------------------------------------------------------- */
+.topbar .song { width: 170px; font-weight: 600; }
+@media (max-width: 1439px) { .topbar .song { width: 140px; } }
+/* Transport, readout, listening mode, search and settings keep their size. When the bar is full, the voice meter,
+   the volume slider and then the song name give way (the name keeps at least 96px and scrolls inside its field). */
+.topbar .transport, .topbar .readout, .topbar .seg, .topbar [data-action="palette.open"], .topbar [data-action="studio.settings"] { flex: none; }
+.topbar .song { width: auto; flex: 0 1 170px; min-width: 96px; }
+@media (max-width: 1439px) { .topbar .song { flex-basis: 140px; } }
+.topbar #master { flex: 0 1 84px; min-width: 40px; }
+.topbar .voices { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+@media (max-width: 1699px) { .topbar { gap: 8px; } .topbar [data-action="palette.open"] kbd { display: none; } }
+
+#workspace { min-width: 0; min-height: 0; overflow: auto; position: relative; }
+.studio-empty, .welcome { height: 100%; }
+.original-workspace { display: grid; grid-template-rows: 36px minmax(0, 1fr); }
+.original-content { min-height: 0; }
+.original-banner { display: flex; justify-content: space-between; align-items: center; padding: 4px 12px; background: var(--bg-2); border-bottom: 1px solid var(--line); }
+.studio-empty > .ic { width: 36px; height: 36px; margin-bottom: 12px; }
+.studio-empty p, .welcome p { max-width: 480px; }
+#tempo { width: 64px; padding: 0; }
+#position { min-width: 64px; }
+#master { width: 84px; }
+.module-rail { position: absolute; left: 0; top: 82px; bottom: 24px; z-index: 2; }
+.module-rail[hidden] { display: none; }
+#selftest { position: absolute; inset: 82px 0 24px; overflow: auto; margin: 0; padding: 16px; background: var(--bg-0); color: var(--ink); z-index: 10; }
+@media (max-width: 1439px) { .topbar { gap: 8px; } .readout { gap: 8px; padding: 0 8px; } }
+
+/* First run and short task guides. */
+.start-screen { max-width: 1040px; margin: 0 auto; padding: 48px 32px; }
+.start-screen h1 { margin-bottom: 12px; }
+.start-doors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 28px 0; }
+.start-card { padding: 24px; }
+.start-card > button { font-weight: 600; }
+.start-card p { margin-bottom: 0; }
+.start-recent { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.help-layout { display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: 24px; }
+.help-nav { display: flex; flex-direction: column; gap: 4px; }
+.help-nav button { text-align: left; white-space: normal; height: auto; min-height: 32px; }
+.help-nav button.on { color: var(--accent); background: var(--bg-2); }
+.help-article h2 { margin-top: 0; }
+.help-article p { line-height: 1.7; }
+.help-keys { display: grid; gap: 12px; }
+.help-keys kbd { min-width: 224px; }
+#bench { position: absolute; inset: 82px 0 24px; overflow: auto; margin: 0; padding: 16px; background: var(--bg-0); color: var(--ink); z-index: 10; }
+/* a part control that a lane overrides: the note says what is heard instead; a control that does nothing is dimmed */
+.override-note { margin: 2px 0 8px; font-size: var(--t-xs); color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center; line-height: 1.35; }
+.override-note.ignored { color: var(--warn); }
+.override-note .btn { padding: 0 6px; min-height: 20px; font-size: var(--t-xs); }
+.overridden[data-level=ignored] > :first-child { opacity: .55; }
+.mix-lane { font-size: var(--t-xs); padding: 0 4px; border-radius: var(--r1); background: var(--bg-3); color: var(--ink-2); margin-left: 4px; }
+.mix-lane.ignored { color: var(--warn); }

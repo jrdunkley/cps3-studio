@@ -1,0 +1,30 @@
+/* Mix workspace: channel strips and the right-hand panel (owner: package B5). Layout only. */
+
+.mix { display: grid; grid-template-columns: minmax(0, 1fr) 340px; min-width: 0; min-height: 0; height: 100%; }
+.strips { display: flex; overflow: auto hidden; padding: var(--s3); gap: 6px; }
+.strip { --c: var(--role-fx); flex: none; width: 84px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 6px; border-radius: var(--r2); background: var(--bg-1); border: 1px solid var(--line); border-top: 3px solid var(--c); }
+.strip .fader { flex: 1; min-height: 140px; display: flex; gap: 6px; align-items: stretch; }
+.strip .name { font-weight: 600; font-size: var(--t-sm); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mix-side { min-height: 0; overflow: auto; border-left: 1px solid var(--line); background: var(--bg-1); }
+.strip-name { font-weight: 600; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0; }
+.strip-instrument { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+.strip-gain { display: flex; align-items: center; gap: 4px; }
+.strip-gain .field { width: 44px; padding: 3px; }
+.device-chips { display: flex; flex-direction: column; gap: 4px; min-height: 34px; width: 100%; }
+.device-chips .btn { font-size: var(--t-xs); padding: 2px 4px; min-height: 22px; }
+.mix-fader-label { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; }
+.mix-fader { writing-mode: vertical-lr; direction: rtl; appearance: none; background: var(--bg-3); width: 6px; flex: 1; min-height: 120px; accent-color: var(--accent); cursor: ns-resize; border-radius: var(--r1); }
+.mix-fader::-webkit-slider-thumb { appearance: none; width: 18px; height: 10px; border-radius: var(--r1); background: var(--accent); border: 1px solid var(--line-3); }
+.mix-fader.thin::-webkit-slider-thumb { width: 10px; background: var(--ink-3); }
+.mix-fader.thin { width: 10px; accent-color: var(--ink-3); }
+.mix-meter { align-self: stretch; height: auto; margin: 23px 0 24px; position: relative; }
+.mix-peak { position: absolute; bottom: calc(var(--peak, 0) * 100%); left: 0; right: 0; height: 2px; background: var(--ink); }
+.mix-master { flex: 1; height: 8px; }
+.mix-spectrum { width: 100%; height: 100px; }
+.target-row { display: flex; flex-direction: column; gap: 4px; margin: 3px 0; }
+.target-scale { position: relative; height: 7px; background: var(--bg-3); border-radius: var(--r1); }
+.target-scale i { position: absolute; left: calc(var(--from) * 100%); width: calc((var(--to) - var(--from)) * 100%); height: 100%; background: var(--good); opacity: .4; }
+.target-scale b { position: absolute; left: calc(var(--value) * 100%); top: -2px; bottom: -2px; width: 2px; background: var(--ink); }
+.mix-issue { padding: 10px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.mix-issue p { margin: 0; line-height: 1.5; }
+.mix-issue:last-child { border-bottom: 0; }

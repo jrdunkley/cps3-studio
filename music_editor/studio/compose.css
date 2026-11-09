@@ -1,0 +1,50 @@
+/* Compose workspace: parts | timeline | inspector over the piano roll (owner: package B3). Layout only. */
+
+.compose { display: grid; grid-template-columns: 268px minmax(0, 1fr) 300px; grid-template-rows: minmax(120px, 1fr) 1px minmax(180px, var(--roll-height, 47%)); min-width: 0; min-height: 0; height: 100%; background: var(--bg-0); }
+.compose > .inspector { grid-column: 3; grid-row: 1 / span 3; border-left: 1px solid var(--line); background: var(--bg-1); overflow: auto; }
+.compose > .splitter.h { grid-column: 1 / span 2; }
+@media (max-width: 1439px) { .compose { grid-template-columns: 240px minmax(0, 1fr) 280px; } }
+
+/* ---- parts list ------------------------------------------------------------------------------------ */
+.parts { display: flex; flex-direction: column; border-right: 1px solid var(--line); background: var(--bg-1); min-height: 0; }
+.parts > header { height: 48px; display: flex; align-items: center; gap: var(--s2); padding: 0 var(--s3); border-bottom: 1px solid var(--line); }
+.parts > .rows { overflow: hidden auto; flex: 1; }
+.part { --c: var(--role-fx); display: grid; grid-template-columns: 4px 1fr auto auto 8px; align-items: center; gap: 8px; height: 44px; padding-right: 10px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.part:hover { background: var(--bg-2); }
+.part.on { background: var(--bg-3); }
+.part > .stripe { align-self: stretch; background: var(--c); opacity: .9; }
+.part .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.part .inst { color: var(--ink-3); font-size: var(--t-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.part .ms { display: flex; gap: 3px; }
+.part .meter { height: 28px; }
+.part.muted .name, .part.muted .inst { opacity: .45; }
+/* a part whose voices land on tracks 13 to 16 (shared with a fight's sound effects): its voices tag takes
+   the kit's warning style, class "tag num warn" - no colour here */
+
+/* ---- timeline ---------------------------------------------------------------------------------------- */
+.timeline { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--bg-0); }
+.timeline > canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* ---- inspector --------------------------------------------------------------------------------------- */
+.inspector > .tabs { padding: 0 var(--s2); position: sticky; top: 0; z-index: 3; }
+.inspector .head { display: flex; align-items: center; gap: var(--s2); }
+.inspector .head .swatch { width: 12px; height: 12px; border-radius: var(--r1); }
+.instrument { display: flex; align-items: center; gap: var(--s2); padding: 8px; border-radius: var(--r2); background: var(--bg-2); border: 1px solid var(--line-2); cursor: pointer; }
+.instrument:hover { border-color: var(--line-3); }
+.instrument b { display: block; } .instrument small { color: var(--ink-3); }
+.device { border: 1px solid var(--line-2); border-radius: var(--r2); background: var(--bg-2); }
+.device > header { display: flex; align-items: center; gap: var(--s2); height: 30px; padding: 0 8px; }
+.device > header b { font-weight: 600; } .device > header small { color: var(--ink-3); margin-left: auto; }
+.device > .body { padding: 2px 8px 8px; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--line); }
+.device.off > header b { color: var(--ink-3); }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+.lab .slider { width: 120px; }
+.inspector .lab > .field { max-width: 132px; min-width: 0; }
+.inspector .pair .lab { flex-wrap: wrap; gap: 4px; }
+.inspector .pair .field { width: 72px; }
+.inspector .instrument { width: 100%; text-align: left; }
+.inspector textarea { width: 100%; resize: vertical; }
+.inspector .device + .device { margin-top: 8px; }
+.inspector .device header .btn { padding: 0 4px; }
+.inspector .lab .num.dim { width: 24px; text-align: right; }
+.inspector .group > h3 { display: flex; align-items: center; justify-content: space-between; }

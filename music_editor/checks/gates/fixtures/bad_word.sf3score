@@ -1,0 +1,7 @@
+cps3 score 1
+title: Misspelt word
+bars: 2
+part Bass program 20 volume 75 expression 64 pan 64
+  bar 1 | E2:4 E2 E2 E2 | % |
+part Pad program 46 volum 64 expression 64 pan 108
+  bar 1 | [A3 C4 E4]:1 | |

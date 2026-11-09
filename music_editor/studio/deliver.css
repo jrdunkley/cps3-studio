@@ -1,0 +1,14 @@
+.deliver-workspace { height: 100%; display: grid; grid-template-rows: minmax(0, 1fr) 36px; }
+.deliver-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: max-content; align-content: start; gap: 16px; padding: 20px; overflow: auto; }
+.deliver-card > header { height: 40px; }
+.deliver-card > .group { padding: 16px; gap: 12px; }
+.deliver-card .lab { max-width: 440px; }
+.deliver-card .lab .field { width: 180px; }
+.deliver-card .lab input.field { width: 84px; }
+.deliver-card .hbox { flex-wrap: wrap; }
+.deliver-needs { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.deliver-needs li { display: flex; align-items: center; gap: 8px; }
+.deliver-needs .ic { flex-shrink: 0; color: var(--good); }
+.deliver-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.deliver-status { display: flex; gap: 12px; align-items: center; border-top: 1px solid var(--line); padding: 4px 20px; background: var(--bg-1); }
+.deliver-progress { width: 100px; }

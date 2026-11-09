@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CPS3 Studio &middot; Game</title>
+<link rel="stylesheet" href="../studio_kit/kit.css"><link rel="stylesheet" href="studio/game.css"></head><body>
+<div class="app" id="studio-app">
+  <div class="topbar">
+    <div class="brand"><span class="mark"></span><span class="wide-only">CPS3 Studio <small>Game</small></span></div><span class="sep"></span>
+    <div class="transport"><button class="btn icon" data-action="game.back"></button><button id="play" class="btn icon play" data-action="game.play"></button><button class="btn icon" data-action="game.step"></button></div>
+    <div class="readout"><small>Frame</small><b id="frame">0</b><small class="wide-only">Time</small><b id="time" class="wide-only">0:00</b></div>
+    <div class="seg" id="speed" aria-label="Speed"></div>
+    <span class="grow"></span>
+    <button id="slots" class="btn ghost" data-tip="Save slots|Save or load a moment of the game. Kept on this computer.">Slots</button>
+    <button id="sound" class="btn icon ghost" aria-label="Sound" data-tip="Sound|Turn the game’s sound on or off."></button>
+    <button class="btn ghost" data-action="palette.open"><kbd class="wide-only">Ctrl K</kbd></button><button id="settings" class="btn icon ghost" aria-label="Settings" data-tip="Settings|Controls, free play, picture size."></button>
+  </div>
+  <div class="tabs" id="workspaces"><button class="btn ghost" id="resources" data-action="game.resources">Frame resources</button><div class="right"><span class="tag" id="source-tag">&hellip;</span><span class="budget" data-tip="CPU|How busy the game’s processor is this frame, as the emulator counts it. Not a measurement of a real board.">CPU <b class="num" id="cpu">&ndash;</b></span><span class="budget">Speed <b class="num" id="fps">&ndash;</b></span></div></div>
+  <main id="workspace"></main>
+  <footer class="statusbar"><span class="hintline grow" data-status>Preparing the game&hellip;</span><span id="engine-label">Exact CPS3 machine &middot; 384 &times; 224</span></footer>
+</div>
+<script src="../studio_kit/icons.js"></script><script src="../studio_kit/kit.js"></script><script src="../studio_kit/panels.js"></script><script src="../studio_kit/core/zip.js"></script><script src="../studio_kit/core/cps3rom.js"></script>
+<script src="../studio_kit/game/engine_wasm.js"></script><script src="../studio_kit/game/core.js"></script><script src="../studio_kit/game/start.js"></script><script src="../studio_kit/game/scenarios.js"></script><script src="../studio_kit/game/rom.js"></script><script src="../studio_kit/game/cps3game.js"></script>
+<script>window.CPS3_GAME_MODULE = true;</script>
+<script src="../studio_kit/core/sources.js"></script><script src="../studio_kit/core/builder.js"></script><script src="../studio_kit/core/project.js"></script><script src="../studio_kit/project_service.js"></script><script src="../studio_kit/shell.js"></script>
+<script src="../studio_kit/game/runner.js"></script><script src="../studio_kit/game/comparison.js"></script>
+<script src="studio/controls.js"></script><script src="studio/main.js"></script><script src="studio/inspection.js"></script><script src="studio/comparison.js"></script><script src="studio/resources.js"></script>
+</body></html>

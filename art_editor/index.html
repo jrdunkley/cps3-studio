@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CPS3 Studio &middot; Art</title>
+<link rel="stylesheet" href="../studio_kit/kit.css"><link rel="stylesheet" href="studio/art.css"><link rel="stylesheet" href="studio/library.css"><link rel="stylesheet" href="studio/findings.css"><link rel="stylesheet" href="studio/everything.css"><link rel="stylesheet" href="studio/edit.css"><link rel="stylesheet" href="studio/import.css"><link rel="stylesheet" href="studio/palettes.css"><link rel="stylesheet" href="studio/deliver.css"><link rel="stylesheet" href="studio/character/character.css"></head><body><div class="app" id="studio-app">
+<div class="topbar"><div class="brand"><span class="mark"></span><span class="wide-only">CPS3 Studio <small>Art</small></span></div><span class="sep"></span>
+<input id="project-name" class="field bare project-name" value="Untitled art" aria-label="Project name" data-tip="Project name|Name your artwork project."><span id="saved" class="tag">Preparing&hellip;</span><span class="grow"></span>
+<div class="transport"><button class="btn icon" data-action="art.first"></button><button class="btn icon" data-action="art.previous"></button><button id="play" class="btn icon play" data-action="art.play"></button><button class="btn icon" data-action="art.next"></button><button id="loop" class="btn icon" data-action="art.loop"></button><button id="speed" class="btn speed" data-action="art.speed">1×</button></div>
+<div class="readout"><small>Frame</small><b id="frame">0/0</b><small>Time</small><b id="time">0:00</b><small class="zoom-label wide-only">Zoom</small><input id="zoom" class="field bare num wide-only" value="800%" aria-label="Zoom" data-tip="Zoom|Type 100 to 6400 per cent. Drawing uses square pixels."></div>
+<label class="wide-only" for="colour">Colour</label><select class="field" id="colour" aria-label="Colour"><option>Pens &middot; grey</option></select><button id="every-colour" class="btn icon" aria-label="Every colour" data-tip="Every colour|This frame in each of the character’s colours."></button>
+<div class="seg"><button id="pixels" class="on" data-tip="Pixels|Square pixels for drawing.">Pixels</button><button id="arcade" data-tip="Arcade|The screen’s real shape. Pixels are narrower than tall.">Arcade</button></div><button class="btn ghost" data-action="palette.open"><kbd class="wide-only">Ctrl K</kbd></button><button id="settings" class="btn icon ghost" aria-label="Settings" data-tip="Settings|Preview, ROM and local storage settings."></button></div>
+<div class="tabs" id="workspaces"><div class="right"><button class="tag" id="game-check" data-tip="Game check|See what your changes need before they go into the game.">Game check</button><span class="budget" data-tip="Changes|Sprites and colours changed in this project.">Changes <b class="num" id="changes">0</b></span><span class="budget" data-tip="Room|Space left in the ROM for your changed sprites, measured after each change. No spare space is assumed.">Room <b class="num" id="room">Not verified</b></span></div></div>
+<main id="workspace"></main><footer class="statusbar"><span class="grow hintline" data-status>Preparing Art&hellip;</span><span>sfiii3nr1 &middot; 384 &times; 224</span></footer></div>
+<script src="../studio_kit/icons.js"></script><script src="../studio_kit/icons_art.js"></script>
+<script src="../studio_kit/kit.js"></script><script src="../studio_kit/panels.js"></script>
+<script src="../studio_kit/core/zip.js"></script>
+<script src="../studio_kit/core/cps3rom.js"></script>
+<script src="../studio_kit/core/sources.js"></script><script src="../studio_kit/core/builder.js"></script><script src="../studio_kit/core/project.js"></script><script src="../studio_kit/project_service.js"></script><script src="../studio_kit/shell.js"></script><script src="../studio_kit/character_projects.js"></script>
+<script src="js/limits.js"></script>
+<script src="js/codec6.js"></script>
+<script src="js/cel.js"></script>
+<script src="js/anim.js"></script>
+<script src="js/palette.js"></script><script src="js/gill.js"></script><script src="js/extendedcolours.js"></script><script src="js/stagecolours.js"></script>
+<script src="js/budget.js"></script>
+<script src="js/names.js"></script>
+<script src="js/cutcontent.js"></script>
+<script src="js/stage.js"></script><script src="js/stage_camera.js"></script>
+<script src="js/truecolours.js"></script><script src="studio/everything.js"></script>
+<script src="js/census.js"></script>
+<script src="js/install.js"></script>
+<script src="js/doc.js"></script>
+<script src="js/ops.js"></script>
+<script src="js/tween.js"></script><script src="js/stretch.js"></script><script src="js/scale.js"></script>
+<script src="js/history.js"></script>
+<script src="js/png.js"></script>
+<script src="js/match.js"></script>
+<script src="js/slice.js"></script>
+<script src="js/framemap.js"></script>
+<script src="js/formats.js"></script>
+<script src="js/ramps.js"></script>
+<script src="js/palfmt.js"></script><script src="js/palshare.js"></script>
+<script src="studio/canvas.js"></script>
+<script src="studio/tools.js"></script>
+<script src="studio/layers.js"></script>
+<script src="studio/penpanel.js"></script>
+<script src="studio/preview.js"></script>
+<script src="studio/strip.js"></script>
+<script src="studio/edit.js"></script>
+<script src="studio/import.js"></script>
+<script src="../studio_kit/colourpicker.js"></script><script src="studio/palettes.js"></script>
+<script src="studio/project_palettes.js"></script>
+<script src="js/gamecheck.js"></script>
+<script src="js/delivery.js"></script>
+<script src="studio/deliver_worker_source.js"></script><script src="studio/census_worker_source.js"></script>
+<script src="studio/deliver.js"></script>
+<script src="studio/state.js"></script>
+<script src="studio/transport.js"></script>
+<script src="studio/animation_names.js"></script>
+<script src="studio/library.js"></script>
+<script src="studio/allcolours.js"></script>
+<script src="studio/start.js"></script>
+<script src="studio/help.js"></script>
+<script src="studio/findings.js"></script>
+<script src="studio/discovery_worker_source.js"></script><script src="studio/discovery.js"></script>
+<script src="studio/gill.js"></script><script src="studio/character/view.js"></script><script src="studio/character/playback.js"></script><script src="studio/character/workspace.js"></script><script src="studio/character/timeline.js"></script><script src="studio/character/start.js"></script><script src="studio/main.js"></script>
+<script src="studio/selftest.js"></script>
+</body></html>

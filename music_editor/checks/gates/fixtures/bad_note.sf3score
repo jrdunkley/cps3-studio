@@ -1,0 +1,5 @@
+cps3 score 1
+title: Wrong note name
+bars: 4
+part Lead program 43 volume 60 expression 58 pan 24
+  bar 1 | A4:4 C5 E5 C5 | % | A4 H4 E5 C5 | % |

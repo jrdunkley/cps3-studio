@@ -1,0 +1,299 @@
+{
+ "format": "sf3song",
+ "version": 1,
+ "name": "Held light",
+ "bpm": 128,
+ "bytes": 266,
+ "sequence_b64": "AAAhAE0AaACDALsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwQG4wgABxDnGPMg6x0AB0OgAAaFAgwACfugAAgLoAAGhPIMAAn7oAAIC1ADCAAHEOcY8yDrHQAHQoTyDAAMAoTmDAAMA1ADCAAHEOcY8yDrHQAHQoTmDAAMAoTWDAAMA1ADCAAHEK8Y2yDbHGAHQpUAwMKVFMDClSGBgpUcwMKVDMDClQGBgpUVgYKVDMDClQDAwpUVgAUDUAMIAAcQUxkvIQMdAAdCsLTAwrDQwMKwtMDCsNDAwrC0wMKw0MDCsLTAwrDQwMKwpMDCsMDAwrCkwMKwwMDCsKTAwrDAwMKwpMDCsMDAw1AA=",
+ "loop_ticks": [
+  0,
+  768
+ ],
+ "marker_bars": 2,
+ "tracks": [
+  {
+   "track": 1,
+   "part": "Pad",
+   "bank": 0,
+   "program": 57,
+   "notes": 2
+  },
+  {
+   "track": 2,
+   "part": "Pad",
+   "bank": 0,
+   "program": 57,
+   "notes": 2
+  },
+  {
+   "track": 3,
+   "part": "Pad",
+   "bank": 0,
+   "program": 57,
+   "notes": 2
+  },
+  {
+   "track": 4,
+   "part": "Lead",
+   "bank": 0,
+   "program": 43,
+   "notes": 10
+  },
+  {
+   "track": 5,
+   "part": "Bass",
+   "bank": 0,
+   "program": 20,
+   "notes": 16
+  }
+ ],
+ "names": {},
+ "project": {
+  "name": "Held light",
+  "bpm": 128,
+  "tempoChanges": [],
+  "bars": 4,
+  "loop": {
+   "on": true,
+   "startBar": 1,
+   "endBar": 4
+  },
+  "markerBars": 2,
+  "parts": [
+   {
+    "name": "Pad",
+    "notes": [
+     {
+      "t": 0,
+      "n": 64,
+      "v": 65,
+      "len": 384
+     },
+     {
+      "t": 0,
+      "n": 60,
+      "v": 65,
+      "len": 384
+     },
+     {
+      "t": 0,
+      "n": 57,
+      "v": 65,
+      "len": 384
+     },
+     {
+      "t": 384,
+      "n": 60,
+      "v": 65,
+      "len": 384
+     },
+     {
+      "t": 384,
+      "n": 57,
+      "v": 65,
+      "len": 384
+     },
+     {
+      "t": 384,
+      "n": 53,
+      "v": 65,
+      "len": 384
+     }
+    ],
+    "polyphony": 3,
+    "bank": 0,
+    "program": 57,
+    "volume": 60,
+    "pan": 64,
+    "expression": 58,
+    "transpose": 0,
+    "voices": 3,
+    "mute": false
+   },
+   {
+    "name": "Lead",
+    "notes": [
+     {
+      "t": 0,
+      "n": 64,
+      "v": 74,
+      "len": 48
+     },
+     {
+      "t": 48,
+      "n": 69,
+      "v": 74,
+      "len": 48
+     },
+     {
+      "t": 96,
+      "n": 72,
+      "v": 74,
+      "len": 96
+     },
+     {
+      "t": 192,
+      "n": 71,
+      "v": 74,
+      "len": 48
+     },
+     {
+      "t": 240,
+      "n": 67,
+      "v": 74,
+      "len": 48
+     },
+     {
+      "t": 288,
+      "n": 64,
+      "v": 74,
+      "len": 96
+     },
+     {
+      "t": 384,
+      "n": 69,
+      "v": 74,
+      "len": 96
+     },
+     {
+      "t": 480,
+      "n": 67,
+      "v": 74,
+      "len": 48
+     },
+     {
+      "t": 528,
+      "n": 64,
+      "v": 74,
+      "len": 48
+     },
+     {
+      "t": 576,
+      "n": 69,
+      "v": 74,
+      "len": 96
+     }
+    ],
+    "polyphony": 1,
+    "bank": 0,
+    "program": 43,
+    "volume": 54,
+    "pan": 24,
+    "expression": 54,
+    "transpose": 0,
+    "voices": 1,
+    "mute": false
+   },
+   {
+    "name": "Bass",
+    "notes": [
+     {
+      "t": 0,
+      "n": 45,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 48,
+      "n": 52,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 96,
+      "n": 45,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 144,
+      "n": 52,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 192,
+      "n": 45,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 240,
+      "n": 52,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 288,
+      "n": 45,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 336,
+      "n": 52,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 384,
+      "n": 41,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 432,
+      "n": 48,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 480,
+      "n": 41,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 528,
+      "n": 48,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 576,
+      "n": 41,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 624,
+      "n": 48,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 672,
+      "n": 41,
+      "v": 88,
+      "len": 48
+     },
+     {
+      "t": 720,
+      "n": 48,
+      "v": 88,
+      "len": 48
+     }
+    ],
+    "polyphony": 1,
+    "bank": 0,
+    "program": 20,
+    "volume": 75,
+    "pan": 64,
+    "expression": 64,
+    "transpose": 0,
+    "voices": 1,
+    "mute": false
+   }
+  ]
+ }
+}
