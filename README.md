@@ -4,6 +4,8 @@
 
 CPS3 Studio runs in your browser and works from your own copy of the game. Music plays on the game's own sound program, artwork and colours come straight from the ROM, and a built-in CPS3 emulator lets you try your changes in the game. There is nothing to install or build, no account, and your files never leave your computer.
 
+**Music | Art | Moves | Gameplay** share one import of your game and one project.
+
 **Bring your own ROMs.** This repository contains no Capcom code, music, samples, artwork or other game data.
 
 ## What you can do
