@@ -2,21 +2,21 @@
 
 ## 2026-11-09
 
-The Studio is now published as its source files: download or clone the repository and open it, nothing to build.
+The Studio is now on GitHub as its own files: download or clone it and open it. Nothing to build.
 
-- **Infinite 1.07b.** The current Infinite release is recognised by its program and data hashes. Art, Moves and Game open on it; its extra colours, stage variants and Gill's timed colours behave as on the previous release (not listed yet, and Palettes says why).
+- **Infinite 1.07b.** The current Infinite release is recognised. Art, Moves and Game work on it in all three modes. Its extra colours, stage colour variants and Gill's timed colours aren't listed yet, and Palettes says why.
 - **Music works whichever game you chose.** Music always uses the original game's sounds and opens normally while Art, Moves and Game work on Infinite. If the original files are missing, Music asks for them without changing the other modules' game.
-- **Plain words.** Every view, tooltip, command and help page was read through and rewritten where it used internal terms. Technical details stay one click away under Technical detail; Art's capability list says what works, what works with limits and what does not yet.
-- **Fixes found on real paths.** Music's Instrument panel on Capcom's tracks, a stale "Add a part" hint, read-only pieces showing Saved, tempo decimals, "1 warnings" and "plays 0 notes a second"; Art's Deliver and game-check messages; the Game label on a new browser's first visit.
+- **Clearer wording.** Menus, tooltips, commands and help use everyday words, with technical details one click away under Technical detail. Art's capability list says what works, what works with limits and what doesn't yet.
+- **Fixes.** Music: the Instrument panel on Capcom's pieces, an "Add a part" hint that stayed after you added one, "Saved" on read-only pieces, tempo decimals and two miscounted labels. Art: plainer Deliver and game-check messages. Game: the name of your game is right on a browser's first visit.
 
 ## 2026-11-08
 
-The first minutes, walked as a new user and smoothed out.
+Starting the Studio for the first time is simpler.
 
 - **Your game files.** The first time the Studio starts it asks where your game is: Find them automatically (Fightcade, the Infinite client, folders you chose before) or Choose files myself (a folder, the two zip files, or a drop). What it finds is listed with the best choice selected and checked when you use it; after that it never asks again. Game files… in the Game menu brings the screen back, and the home page names the game in use with Change….
 - **Infinite 1.07-1.** The current Infinite release is recognised. Art, Moves and Game open on it in all three modes; its extra colours, stage variants and Gill's timed colours behave as on the previous release (not listed yet).
 - **Quieter.** No status line about files that were just read, no "Saved" on a song or artwork that holds nothing yet, no empty "Untitled art" in Recent projects, and the Music tour starts only when you ask for it.
-- **Clearer.** The piano roll says to add a part before drawing; Try in game says how to reach the change; Art's sprite panel says when it is still measuring instead of naming internal steps.
+- **Clearer.** The piano roll says to add a part before drawing; Try in game says how to reach the change; Art's sprite panel says when it is still measuring.
 
 ## 2026-11-07
 
